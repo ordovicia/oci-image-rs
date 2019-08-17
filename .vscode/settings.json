@@ -1,0 +1,25 @@
+{
+    "cSpell.words": [
+        "and",
+        "chrono",
+        "concat",
+        "conv",
+        "deser",
+        "deserializer",
+        "entrypoint",
+        "freebsd",
+        "hms",
+        "mipsle",
+        "nano",
+        "netbsd",
+        "nondistributable",
+        "openbsd",
+        "opencontainers",
+        "rootfs",
+        "ser",
+        "serde",
+        "serializer",
+        "solaris",
+        "spdx"
+    ],
+}
