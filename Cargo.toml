@@ -1,0 +1,20 @@
+[package]
+name = "oci-image"
+version = "0.1.0"
+authors = ["Hidehito Yabuuchi <hdht.ybuc@gmail.com>"]
+edition = "2018"
+
+[features]
+default = ["serde"]
+
+[dependencies]
+chrono = { version = "0.4.7", features = ["serde"] }
+hex = "0.3.2"
+lazy_static = "1.3.0"
+regex = "1.2.1"
+sha2 = "0.8.0"
+serde = { version = "1.0.98", features = ["derive"], optional = true }
+url = { version = "2.1.0", features = ["serde"] }
+
+[dev-dependencies]
+serde_json = "1.0.40"
