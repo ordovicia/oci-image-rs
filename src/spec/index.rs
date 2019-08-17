@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::{Annotations, Descriptor};
+use crate::spec::{Annotations, Descriptor};
 
 /// Image index.
 /// See the [OCI image spec] for more information.
@@ -35,7 +35,7 @@ pub struct Index {
 #[cfg(all(feature = "serde", test))]
 mod tests {
   use super::*;
-  use crate::{
+  use crate::spec::{
     descriptor::{Architecture, Os, Platform},
     Digest, MediaType,
   };

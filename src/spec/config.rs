@@ -10,7 +10,7 @@ use chrono::{DateTime, FixedOffset};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::{
+use crate::spec::{
     descriptor::{Architecture, Os},
     Annotations, Digest, GoSet,
 };
@@ -275,7 +275,7 @@ impl StdErr for ParseEnvVarError {}
 #[cfg(all(feature = "serde", test))]
 mod tests {
     use super::*;
-    use crate::descriptor::{Architecture, Os};
+    use crate::spec::descriptor::{Architecture, Os};
     use chrono::TimeZone;
     use std::string::ToString;
 

@@ -1,7 +1,7 @@
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-use crate::{Annotations, Descriptor};
+use crate::spec::{Annotations, Descriptor};
 
 /// Image manifest.
 ///
@@ -39,7 +39,7 @@ pub struct Manifest {
 #[cfg(all(feature = "serde", test))]
 mod tests {
   use super::*;
-  use crate::{Digest, MediaType};
+  use crate::spec::{Digest, MediaType};
   use std::str::FromStr;
 
   // Example from https://github.com/opencontainers/image-spec/blob/master/manifest.md#example-image-manifest
