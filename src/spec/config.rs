@@ -4,7 +4,7 @@
 //!
 //! [OCI image spec]: https://github.com/opencontainers/image-spec/blob/master/config.md
 
-use std::{error::Error as StdErr, fmt, str::FromStr};
+use std::{error::Error, fmt, str::FromStr};
 
 use chrono::{DateTime, FixedOffset};
 #[cfg(feature = "serde")]
@@ -129,7 +129,7 @@ pub enum Port {
 /// Error type for parsing a string into a `Port`.
 #[derive(Debug)]
 pub struct ParsePortError {
-    source: Option<Box<dyn StdErr + Send + Sync + 'static>>,
+    source: Option<Box<dyn Error + Send + Sync + 'static>>,
 }
 
 /// Environment variable.
@@ -255,8 +255,8 @@ impl fmt::Display for ParsePortError {
     }
 }
 
-impl StdErr for ParsePortError {
-    fn source(&self) -> Option<&(dyn StdErr + 'static)> {
+impl Error for ParsePortError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self.source {
             Some(ref s) => Some(&**s),
             None => None,
@@ -270,7 +270,7 @@ impl fmt::Display for ParseEnvVarError {
     }
 }
 
-impl StdErr for ParseEnvVarError {}
+impl Error for ParseEnvVarError {}
 
 #[cfg(all(feature = "serde", test))]
 mod tests {

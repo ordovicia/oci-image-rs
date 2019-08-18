@@ -4,7 +4,7 @@
 //!
 //! [OCI image spec]: https://github.com/opencontainers/image-spec/blob/master/descriptor.md#digests
 
-use std::{fmt, str::FromStr};
+use std::{error::Error, fmt, str::FromStr};
 
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -161,7 +161,7 @@ impl fmt::Display for ParseDigestError {
     }
 }
 
-impl std::error::Error for ParseDigestError {}
+impl Error for ParseDigestError {}
 
 impl fmt::Display for ValidateDigestError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -172,7 +172,7 @@ impl fmt::Display for ValidateDigestError {
     }
 }
 
-impl std::error::Error for ValidateDigestError {}
+impl Error for ValidateDigestError {}
 
 impl fmt::Display for VerifyDigestError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -182,7 +182,7 @@ impl fmt::Display for VerifyDigestError {
     }
 }
 
-impl std::error::Error for VerifyDigestError {}
+impl Error for VerifyDigestError {}
 
 #[cfg(test)]
 mod tests {
