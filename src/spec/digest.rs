@@ -165,11 +165,9 @@ impl std::error::Error for ParseDigestError {}
 
 impl fmt::Display for ValidateDigestError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use ValidateDigestError::*;
-
         match self {
-            AlgorithmUnsupported => f.write_str("Unsupported digest algorithm"),
-            InvalidForm => f.write_str("Invalid digest form"),
+            Self::AlgorithmUnsupported => f.write_str("Unsupported digest algorithm"),
+            Self::InvalidForm => f.write_str("Invalid digest form"),
         }
     }
 }
@@ -179,7 +177,7 @@ impl std::error::Error for ValidateDigestError {}
 impl fmt::Display for VerifyDigestError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            VerifyDigestError::AlgorithmUnsupported => f.write_str("Unsupported digest algorithm"),
+            Self::AlgorithmUnsupported => f.write_str("Unsupported digest algorithm"),
         }
     }
 }

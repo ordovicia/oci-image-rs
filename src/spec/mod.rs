@@ -10,18 +10,18 @@ macro_rules! impl_str_conv {
         impl std::fmt::Display for $e {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>)-> std::fmt::Result {
                 f.write_str(match self {
-                    $($e::$v => $s),*,
-                    $e::Other(s) => s
+                    $(Self::$v => $s),*,
+                    Self::Other(s) => s
                 })
             }
         }
 
         impl std::str::FromStr for $e {
             type Err = std::convert::Infallible;
-            fn from_str(s: &str) -> Result<$e, Self::Err> {
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
                 Ok(match s {
-                    $($s => $e::$v),*,
-                    _ => $e::Other(s.to_string()),
+                    $($s => Self::$v),*,
+                    _ => Self::Other(s.to_string()),
                 })
             }
         }
