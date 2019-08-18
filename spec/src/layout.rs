@@ -16,6 +16,9 @@ pub const IMAGE_LAYOUT_VERSION: &str = "1.0.0";
 /// File name of the entry point for an image layout.
 pub const INDEX_JSON: &str = "index.json";
 
+/// Name of directory that contains blobs.
+pub const BLOBS: &str = "blobs";
+
 /// Structure in the `oci-layout` file.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(
