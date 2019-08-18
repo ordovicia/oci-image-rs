@@ -35,7 +35,7 @@ pub struct ParseDigestError;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ValidateDigestError {
     /// Digest algorithm is not supported.
-    AlgorithmUnsupported,
+    AlgorithmNotSupported,
     /// Digest is invalid.
     InvalidForm,
 }
@@ -44,7 +44,7 @@ pub enum ValidateDigestError {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VerifyDigestError {
     /// Digest algorithm is not supported.
-    AlgorithmUnsupported,
+    AlgorithmNotSupported,
 }
 
 impl Digest {
@@ -87,7 +87,7 @@ impl Digest {
                 }
             }
             Other(_) => {
-                return Err(AlgorithmUnsupported);
+                return Err(AlgorithmNotSupported);
             }
         }
 
@@ -111,7 +111,7 @@ impl Digest {
                 let hash = sha2::Sha512::digest(content);
                 Ok(hex::encode(hash) == self.encoded)
             }
-            Other(_) => Err(VerifyDigestError::AlgorithmUnsupported),
+            Other(_) => Err(VerifyDigestError::AlgorithmNotSupported),
         }
     }
 }
@@ -166,7 +166,7 @@ impl Error for ParseDigestError {}
 impl fmt::Display for ValidateDigestError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::AlgorithmUnsupported => f.write_str("Unsupported digest algorithm"),
+            Self::AlgorithmNotSupported => f.write_str("Unsupported digest algorithm"),
             Self::InvalidForm => f.write_str("Invalid digest form"),
         }
     }
@@ -177,7 +177,7 @@ impl Error for ValidateDigestError {}
 impl fmt::Display for VerifyDigestError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::AlgorithmUnsupported => f.write_str("Unsupported digest algorithm"),
+            Self::AlgorithmNotSupported => f.write_str("Unsupported digest algorithm"),
         }
     }
 }
@@ -212,7 +212,7 @@ mod tests {
         };
         assert_eq!(
             digest.validate().unwrap_err(),
-            ValidateDigestError::AlgorithmUnsupported
+            ValidateDigestError::AlgorithmNotSupported
         );
     }
 
@@ -236,7 +236,7 @@ mod tests {
         };
         assert_eq!(
             digest.verify(b"foo").unwrap_err(),
-            VerifyDigestError::AlgorithmUnsupported
+            VerifyDigestError::AlgorithmNotSupported
         );
     }
 }
