@@ -187,8 +187,8 @@ pub struct History {
 impl fmt::Display for Port {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Port::Udp { port } => write!(f, "{}/udp", port),
-            Port::Tcp { port } => write!(f, "{}/tcp", port),
+            Self::Udp { port } => write!(f, "{}/udp", port),
+            Self::Tcp { port } => write!(f, "{}/tcp", port),
         }
     }
 }
@@ -209,8 +209,8 @@ impl FromStr for Port {
         })?;
 
         match protocol {
-            "udp" => Ok(Port::Udp { port }),
-            "tcp" => Ok(Port::Tcp { port }),
+            "udp" => Ok(Self::Udp { port }),
+            "tcp" => Ok(Self::Tcp { port }),
             _ => Err(ParsePortError { source: None }),
         }
     }
