@@ -184,8 +184,65 @@ impl fmt::Display for VerifyDigestError {
 
 impl std::error::Error for VerifyDigestError {}
 
-#[cfg(all(feature = "serde", test))]
+#[cfg(test)]
 mod tests {
+    use super::*;
+    use Algorithm::*;
+
+    #[test]
+    fn test_digest_validate() {
+        let digest = Digest {
+            algorithm: Sha256,
+            encoded: "6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b".to_string(),
+        };
+        assert_eq!(digest.validate(), Ok(()));
+
+        let digest = Digest {
+            algorithm: Sha512,
+            encoded: "401b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b372742".to_string(),
+        };
+        assert_eq!(
+            digest.validate().unwrap_err(),
+            ValidateDigestError::InvalidForm
+        );
+
+        let digest = Digest {
+            algorithm: Other("foo".to_string()),
+            encoded: "6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b".to_string(),
+        };
+        assert_eq!(
+            digest.validate().unwrap_err(),
+            ValidateDigestError::AlgorithmUnsupported
+        );
+    }
+
+    #[test]
+    fn test_digest_verify() {
+        let digest = Digest {
+            algorithm: Sha256,
+            encoded: "2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae".to_string(),
+        };
+        assert_eq!(digest.verify(b"foo"), Ok(true));
+
+        let digest = Digest {
+            algorithm: Sha256,
+            encoded: "1c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae".to_string(),
+        };
+        assert_eq!(digest.verify(b"foo"), Ok(false));
+
+        let digest = Digest {
+            algorithm: Other("foo".to_string()),
+            encoded: "2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae".to_string(),
+        };
+        assert_eq!(
+            digest.verify(b"foo").unwrap_err(),
+            VerifyDigestError::AlgorithmUnsupported
+        );
+    }
+}
+
+#[cfg(all(feature = "serde", test))]
+mod tests_serde {
     use super::*;
     use Algorithm::*;
 
@@ -256,57 +313,6 @@ mod tests {
         assert_eq!(
             serde_json::to_string(&digest).unwrap(),
             r#""sha256+b64u:LCa0a2j_xo_5m0U8HTBBNBNCLXBkg7-g-YpeiGJm564""#,
-        );
-    }
-
-    #[test]
-    fn test_digest_validate() {
-        let digest = Digest {
-            algorithm: Sha256,
-            encoded: "6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b".to_string(),
-        };
-        assert_eq!(digest.validate(), Ok(()));
-
-        let digest = Digest {
-            algorithm: Sha512,
-            encoded: "401b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b372742".to_string(),
-        };
-        assert_eq!(
-            digest.validate().unwrap_err(),
-            ValidateDigestError::InvalidForm
-        );
-
-        let digest = Digest {
-            algorithm: Other("foo".to_string()),
-            encoded: "6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b".to_string(),
-        };
-        assert_eq!(
-            digest.validate().unwrap_err(),
-            ValidateDigestError::AlgorithmUnsupported
-        );
-    }
-
-    #[test]
-    fn test_digest_verify() {
-        let digest = Digest {
-            algorithm: Sha256,
-            encoded: "2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae".to_string(),
-        };
-        assert_eq!(digest.verify(b"foo"), Ok(true));
-
-        let digest = Digest {
-            algorithm: Sha256,
-            encoded: "1c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae".to_string(),
-        };
-        assert_eq!(digest.verify(b"foo"), Ok(false));
-
-        let digest = Digest {
-            algorithm: Other("foo".to_string()),
-            encoded: "2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae".to_string(),
-        };
-        assert_eq!(
-            digest.verify(b"foo").unwrap_err(),
-            VerifyDigestError::AlgorithmUnsupported
         );
     }
 }
