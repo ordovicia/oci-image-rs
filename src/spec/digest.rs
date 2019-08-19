@@ -29,11 +29,11 @@ pub enum Algorithm {
 
 /// Error type for parsing a string into a `Digest`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct ParseDigestError;
+pub struct ParseError;
 
 /// Error type for validating the format of a `Digest`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum ValidateDigestError {
+pub enum ValidateError {
     /// Digest algorithm is not supported.
     AlgorithmNotSupported,
     /// Digest is invalid.
@@ -42,7 +42,7 @@ pub enum ValidateDigestError {
 
 /// Error type for verifying a content with a digest.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum VerifyDigestError {
+pub enum VerifyError {
     /// Digest algorithm is not supported.
     AlgorithmNotSupported,
 }
@@ -61,11 +61,10 @@ impl Digest {
     /// Validates the format of this digest.
     ///
     /// Returns `Ok(())` if this digest has valid format. Otherwise, returns an
-    /// `Err(ValidateDigestError)`. The reason why verification failed can be obtained via its
-    /// variant.
-    pub fn validate(&self) -> Result<(), ValidateDigestError> {
+    /// `Err(ValidateError)`. The reason why verification failed can be obtained via its variant.
+    pub fn validate(&self) -> Result<(), ValidateError> {
         use Algorithm::*;
-        use ValidateDigestError::*;
+        use ValidateError::*;
 
         match self.algorithm {
             Sha256 => {
@@ -97,8 +96,8 @@ impl Digest {
     /// Verifies a content with this digest.
     ///
     /// Returns `Ok(true)` if the content is verified. Returns `Ok(false)` if not verified.
-    /// If the verification cannot be performed, `Err(VerifyDigestError)` is returned.
-    pub fn verify(&self, content: &[u8]) -> Result<bool, VerifyDigestError> {
+    /// If the verification cannot be performed, `Err(VerifyError)` is returned.
+    pub fn verify(&self, content: &[u8]) -> Result<bool, VerifyError> {
         use sha2::Digest;
         use Algorithm::*;
 
@@ -111,7 +110,7 @@ impl Digest {
                 let hash = sha2::Sha512::digest(content);
                 Ok(hex::encode(hash) == self.encoded)
             }
-            Other(_) => Err(VerifyDigestError::AlgorithmNotSupported),
+            Other(_) => Err(VerifyError::AlgorithmNotSupported),
         }
     }
 }
@@ -123,7 +122,7 @@ impl fmt::Display for Digest {
 }
 
 impl FromStr for Digest {
-    type Err = ParseDigestError;
+    type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         lazy_static! {
@@ -132,16 +131,16 @@ impl FromStr for Digest {
         }
 
         if !DIGEST_RE.is_match(s) {
-            return Err(ParseDigestError);
+            return Err(ParseError);
         }
 
         let mut colon_sp = s.split(':');
         let algorithm = colon_sp
             .next()
-            .ok_or(ParseDigestError)?
+            .ok_or(ParseError)?
             .parse::<Algorithm>()
             .unwrap();
-        let encoded = colon_sp.next().ok_or(ParseDigestError)?.to_string();
+        let encoded = colon_sp.next().ok_or(ParseError)?.to_string();
 
         Ok(Digest { algorithm, encoded })
     }
@@ -155,15 +154,15 @@ impl_str_conv! {
     (Sha512, "sha512")
 }
 
-impl fmt::Display for ParseDigestError {
+impl fmt::Display for ParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Failed to parse digest")
     }
 }
 
-impl Error for ParseDigestError {}
+impl Error for ParseError {}
 
-impl fmt::Display for ValidateDigestError {
+impl fmt::Display for ValidateError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::AlgorithmNotSupported => f.write_str("Unsupported digest algorithm"),
@@ -172,9 +171,9 @@ impl fmt::Display for ValidateDigestError {
     }
 }
 
-impl Error for ValidateDigestError {}
+impl Error for ValidateError {}
 
-impl fmt::Display for VerifyDigestError {
+impl fmt::Display for VerifyError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::AlgorithmNotSupported => f.write_str("Unsupported digest algorithm"),
@@ -182,7 +181,7 @@ impl fmt::Display for VerifyDigestError {
     }
 }
 
-impl Error for VerifyDigestError {}
+impl Error for VerifyError {}
 
 #[cfg(test)]
 mod tests {
@@ -201,10 +200,7 @@ mod tests {
             algorithm: Sha512,
             encoded: "401b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b372742".to_string(),
         };
-        assert_eq!(
-            digest.validate().unwrap_err(),
-            ValidateDigestError::InvalidForm
-        );
+        assert_eq!(digest.validate().unwrap_err(), ValidateError::InvalidForm);
 
         let digest = Digest {
             algorithm: Other("foo".to_string()),
@@ -212,7 +208,7 @@ mod tests {
         };
         assert_eq!(
             digest.validate().unwrap_err(),
-            ValidateDigestError::AlgorithmNotSupported
+            ValidateError::AlgorithmNotSupported
         );
     }
 
@@ -236,7 +232,7 @@ mod tests {
         };
         assert_eq!(
             digest.verify(b"foo").unwrap_err(),
-            VerifyDigestError::AlgorithmNotSupported
+            VerifyError::AlgorithmNotSupported
         );
     }
 }
