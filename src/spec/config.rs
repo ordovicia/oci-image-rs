@@ -127,9 +127,9 @@ pub enum Port {
 }
 
 /// Error type for parsing a string into a `Port`.
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ParsePortError {
-    source: Option<Box<dyn Error + Send + Sync + 'static>>,
+    source: Option<std::num::ParseIntError>,
 }
 
 /// Environment variable.
@@ -204,9 +204,7 @@ impl FromStr for Port {
             (port, protocol)
         };
 
-        let port = port.parse::<u16>().map_err(|e| ParsePortError {
-            source: Some(Box::new(e)),
-        })?;
+        let port = port.parse::<u16>().map_err(|e| ParsePortError { source: Some(e) })?;
 
         match protocol {
             "udp" => Ok(Self::Udp { port }),
@@ -258,7 +256,7 @@ impl fmt::Display for ParsePortError {
 impl Error for ParsePortError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self.source {
-            Some(ref s) => Some(&**s),
+            Some(ref s) => Some(s),
             None => None,
         }
     }
