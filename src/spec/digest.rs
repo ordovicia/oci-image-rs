@@ -4,7 +4,7 @@
 //!
 //! [OCI image spec]: https://github.com/opencontainers/image-spec/blob/master/descriptor.md#digests
 
-use std::{error::Error, fmt, str::FromStr};
+use std::{error::Error, fmt, io, str::FromStr};
 
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -40,9 +40,11 @@ pub enum ValidateError {
     AlgorithmNotSupported,
 }
 
-/// Error type for verifying a content with a digest.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// Error type that can be returned when failed to verify a content with a digest.
+#[derive(Debug)]
 pub enum VerifyError {
+    /// Failed to read the content.
+    Read(io::Error),
     /// Digest algorithm is not supported.
     AlgorithmNotSupported,
 }
@@ -59,7 +61,7 @@ impl Digest {
     /// # Examples
     ///
     /// ```
-    /// use oci_image_spec::{Digest, digest::Algorithm};
+    /// use oci_image::spec::{Digest, digest::Algorithm};
     ///
     /// let digest = Digest {
     ///     algorithm: Algorithm::Sha256,
@@ -78,32 +80,53 @@ impl Digest {
                     static ref RE: Regex = Regex::new("^[a-f0-9]{64}$").unwrap();
                 }
                 Ok(RE.is_match(&self.encoded))
-                }
+            }
             Sha512 => {
                 lazy_static! {
                     static ref RE: Regex = Regex::new("^[a-f0-9]{128}$").unwrap();
                 }
                 Ok(RE.is_match(&self.encoded))
-                }
+            }
             Other(_) => Err(AlgorithmNotSupported),
-            }
-            }
+        }
+    }
 
     /// Verifies a content with this digest.
     ///
     /// Returns `Ok(true)` if the content is verified. Returns `Ok(false)` if not verified.
+    ///
+    /// # Errors
+    ///
     /// If the verification cannot be performed, `Err(VerifyError)` is returned.
-    pub fn verify(&self, content: &[u8]) -> Result<bool, VerifyError> {
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use oci_image::spec::{Digest, digest::Algorithm};
+    ///
+    /// let content = b"foo";
+    /// let digest = Digest {
+    ///     algorithm: Algorithm::Sha256,
+    ///     encoded: "2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae".to_string(),
+    /// };
+    ///
+    /// assert_eq!(digest.verify(&content[..]).unwrap(), true);
+    /// ```
+    pub fn verify(&self, mut reader: impl io::Read) -> Result<bool, VerifyError> {
         use sha2::Digest;
         use Algorithm::*;
 
         match self.algorithm {
             Sha256 => {
-                let hash = sha2::Sha256::digest(content);
+                let mut hasher = sha2::Sha256::new();
+                io::copy(&mut reader, &mut hasher).map_err(VerifyError::Read)?;
+                let hash = hasher.result();
                 Ok(hex::encode(hash) == self.encoded)
             }
             Sha512 => {
-                let hash = sha2::Sha512::digest(content);
+                let mut hasher = sha2::Sha512::new();
+                io::copy(&mut reader, &mut hasher).map_err(VerifyError::Read)?;
+                let hash = hasher.result();
                 Ok(hex::encode(hash) == self.encoded)
             }
             Other(_) => Err(VerifyError::AlgorithmNotSupported),
@@ -171,12 +194,20 @@ impl Error for ValidateError {}
 impl fmt::Display for VerifyError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::Read(e) => write!(f, "Read failed: {}", e),
             Self::AlgorithmNotSupported => f.write_str("Unsupported digest algorithm"),
         }
     }
 }
 
-impl Error for VerifyError {}
+impl Error for VerifyError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match self {
+            Self::Read(ref e) => Some(e),
+            Self::AlgorithmNotSupported => None,
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {
@@ -203,25 +234,21 @@ mod tests {
 
     #[test]
     fn test_digest_verify() {
-        let digest = Digest {
-            algorithm: Sha256,
-            encoded: "2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae".to_string(),
-        };
-        assert_eq!(digest.verify(b"foo"), Ok(true));
+        let content = &b"foo"[..];
 
         let digest = Digest {
             algorithm: Sha256,
             encoded: "1c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae".to_string(),
         };
-        assert_eq!(digest.verify(b"foo"), Ok(false));
+        assert!(!digest.verify(content).unwrap());
 
         let digest = Digest {
             algorithm: Other("foo".to_string()),
             encoded: "2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae".to_string(),
         };
         assert_eq!(
-            digest.verify(b"foo").unwrap_err(),
-            VerifyError::AlgorithmNotSupported
+            std::mem::discriminant(&digest.verify(content).unwrap_err()),
+            std::mem::discriminant(&VerifyError::AlgorithmNotSupported)
         );
     }
 }
