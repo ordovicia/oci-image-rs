@@ -4,7 +4,7 @@
 //!
 //! [OCI image spec]: https://github.com/opencontainers/image-spec/blob/master/descriptor.md#digests
 
-use std::{fmt, str::FromStr};
+use std::{error::Error, fmt, str::FromStr};
 
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -35,7 +35,7 @@ pub struct ParseDigestError;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ValidateDigestError {
     /// Digest algorithm is not supported.
-    AlgorithmUnsupported,
+    AlgorithmNotSupported,
     /// Digest is invalid.
     InvalidForm,
 }
@@ -44,7 +44,7 @@ pub enum ValidateDigestError {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VerifyDigestError {
     /// Digest algorithm is not supported.
-    AlgorithmUnsupported,
+    AlgorithmNotSupported,
 }
 
 impl Digest {
@@ -87,7 +87,7 @@ impl Digest {
                 }
             }
             Other(_) => {
-                return Err(AlgorithmUnsupported);
+                return Err(AlgorithmNotSupported);
             }
         }
 
@@ -111,7 +111,7 @@ impl Digest {
                 let hash = sha2::Sha512::digest(content);
                 Ok(hex::encode(hash) == self.encoded)
             }
-            Other(_) => Err(VerifyDigestError::AlgorithmUnsupported),
+            Other(_) => Err(VerifyDigestError::AlgorithmNotSupported),
         }
     }
 }
@@ -161,28 +161,28 @@ impl fmt::Display for ParseDigestError {
     }
 }
 
-impl std::error::Error for ParseDigestError {}
+impl Error for ParseDigestError {}
 
 impl fmt::Display for ValidateDigestError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::AlgorithmUnsupported => f.write_str("Unsupported digest algorithm"),
+            Self::AlgorithmNotSupported => f.write_str("Unsupported digest algorithm"),
             Self::InvalidForm => f.write_str("Invalid digest form"),
         }
     }
 }
 
-impl std::error::Error for ValidateDigestError {}
+impl Error for ValidateDigestError {}
 
 impl fmt::Display for VerifyDigestError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::AlgorithmUnsupported => f.write_str("Unsupported digest algorithm"),
+            Self::AlgorithmNotSupported => f.write_str("Unsupported digest algorithm"),
         }
     }
 }
 
-impl std::error::Error for VerifyDigestError {}
+impl Error for VerifyDigestError {}
 
 #[cfg(test)]
 mod tests {
@@ -212,7 +212,7 @@ mod tests {
         };
         assert_eq!(
             digest.validate().unwrap_err(),
-            ValidateDigestError::AlgorithmUnsupported
+            ValidateDigestError::AlgorithmNotSupported
         );
     }
 
@@ -236,7 +236,7 @@ mod tests {
         };
         assert_eq!(
             digest.verify(b"foo").unwrap_err(),
-            VerifyDigestError::AlgorithmUnsupported
+            VerifyDigestError::AlgorithmNotSupported
         );
     }
 }
