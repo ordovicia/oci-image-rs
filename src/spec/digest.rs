@@ -33,13 +33,11 @@ pub enum Algorithm {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ParseError;
 
-/// Error type for validating the format of a `Digest`.
+/// Error type that can be returned when failed to validate the format of a digest.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ValidateError {
     /// Digest algorithm is not supported.
     AlgorithmNotSupported,
-    /// Digest is invalid.
-    InvalidForm,
 }
 
 /// Error type for verifying a content with a digest.
@@ -52,9 +50,25 @@ pub enum VerifyError {
 impl Digest {
     /// Validates the format of this digest.
     ///
-    /// Returns `Ok(())` if this digest has valid format. Otherwise, returns an
-    /// `Err(ValidateError)`. The reason why verification failed can be obtained via its variant.
-    pub fn validate(&self) -> Result<(), ValidateError> {
+    /// Returns `Ok(true)` if this digest has a valid format. Returns `Ok(false)` if does not.
+    ///
+    /// # Errors
+    ///
+    /// If the verification cannot be performed, `Err(ValidateError)` is returned.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use oci_image_spec::{Digest, digest::Algorithm};
+    ///
+    /// let digest = Digest {
+    ///     algorithm: Algorithm::Sha256,
+    ///     encoded: "6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b".to_string(),
+    /// };
+    ///
+    /// assert_eq!(digest.validate(), Ok(true));
+    /// ```
+    pub fn validate(&self) -> Result<bool, ValidateError> {
         use Algorithm::*;
         use ValidateError::*;
 
@@ -63,27 +77,17 @@ impl Digest {
                 lazy_static! {
                     static ref RE: Regex = Regex::new("^[a-f0-9]{64}$").unwrap();
                 }
-
-                if !RE.is_match(&self.encoded) {
-                    return Err(InvalidForm);
+                Ok(RE.is_match(&self.encoded))
                 }
-            }
             Sha512 => {
                 lazy_static! {
                     static ref RE: Regex = Regex::new("^[a-f0-9]{128}$").unwrap();
                 }
-
-                if !RE.is_match(&self.encoded) {
-                    return Err(InvalidForm);
+                Ok(RE.is_match(&self.encoded))
                 }
+            Other(_) => Err(AlgorithmNotSupported),
             }
-            Other(_) => {
-                return Err(AlgorithmNotSupported);
             }
-        }
-
-        Ok(())
-    }
 
     /// Verifies a content with this digest.
     ///
@@ -158,7 +162,6 @@ impl fmt::Display for ValidateError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::AlgorithmNotSupported => f.write_str("Unsupported digest algorithm"),
-            Self::InvalidForm => f.write_str("Invalid digest form"),
         }
     }
 }
@@ -183,16 +186,10 @@ mod tests {
     #[test]
     fn test_digest_validate() {
         let digest = Digest {
-            algorithm: Sha256,
-            encoded: "6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b".to_string(),
-        };
-        assert_eq!(digest.validate(), Ok(()));
-
-        let digest = Digest {
             algorithm: Sha512,
             encoded: "401b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b372742".to_string(),
         };
-        assert_eq!(digest.validate().unwrap_err(), ValidateError::InvalidForm);
+        assert_eq!(digest.validate(), Ok(false));
 
         let digest = Digest {
             algorithm: Other("foo".to_string()),
