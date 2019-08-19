@@ -8,7 +8,7 @@
 use serde::{Deserialize, Serialize};
 use url::Url;
 
-use crate::spec::{Annotations, Digest, MediaType};
+use crate::{Annotations, Digest, MediaType};
 
 /// Content descriptor.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -197,7 +197,7 @@ impl_serde_for_str_conv!(CpuVariant);
 #[cfg(all(feature = "serde", test))]
 mod tests {
     use super::*;
-    use crate::spec::Descriptor;
+    use crate::Descriptor;
     use std::str::FromStr;
 
     // Example from https://github.com/opencontainers/image-spec/blob/master/descriptor.md#examples

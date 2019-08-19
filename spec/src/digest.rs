@@ -61,7 +61,7 @@ impl Digest {
     /// # Examples
     ///
     /// ```
-    /// use oci_image::spec::{Digest, digest::Algorithm};
+    /// use oci_image_spec::{Digest, digest::Algorithm};
     ///
     /// let digest = Digest {
     ///     algorithm: Algorithm::Sha256,
@@ -102,7 +102,7 @@ impl Digest {
     /// # Examples
     ///
     /// ```
-    /// use oci_image::spec::{Digest, digest::Algorithm};
+    /// use oci_image_spec::{Digest, digest::Algorithm};
     ///
     /// let content = b"foo";
     /// let digest = Digest {

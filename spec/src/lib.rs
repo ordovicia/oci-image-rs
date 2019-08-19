@@ -4,6 +4,17 @@
 //!
 //! [OCI image spec]: https://github.com/opencontainers/image-spec/blob/master/spec.md
 
+#![warn(
+    future_incompatible,
+    missing_docs,
+    missing_debug_implementations,
+    nonstandard_style,
+    rust_2018_idioms,
+    trivial_casts,
+    trivial_numeric_casts,
+    unused
+)]
+
 #[macro_use]
 macro_rules! impl_str_conv {
     ( $e: ident, $( ($v: ident, $s: expr) ),* ) => {

@@ -5,4 +5,6 @@ rust:
   - nightly
 script:
   - cargo test --verbose --all
-  - cargo test --verbose --all --no-default-features
+    # `--all --no-default-features` does not work intuitively
+    # https://github.com/rust-lang/cargo/issues/5364
+  - cargo test --verbose --manifest-path spec/Cargo.toml --no-default-features
