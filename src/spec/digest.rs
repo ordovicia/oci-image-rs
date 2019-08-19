@@ -12,8 +12,10 @@ use regex::Regex;
 /// Digest, as a content identifier.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Digest {
-    algorithm: Algorithm,
-    encoded: String,
+    /// Hash algorithm.
+    pub algorithm: Algorithm,
+    /// Encoded result of the content by the hash algorithm.
+    pub encoded: String,
 }
 
 /// Registered and other hash algorithms.
@@ -48,16 +50,6 @@ pub enum VerifyError {
 }
 
 impl Digest {
-    /// Returns the hash algorithm.
-    pub fn algorithm(&self) -> &Algorithm {
-        &self.algorithm
-    }
-
-    /// Returns the encoded result of the content by the hash algorithm.
-    pub fn encoded(&self) -> &str {
-        &self.encoded
-    }
-
     /// Validates the format of this digest.
     ///
     /// Returns `Ok(())` if this digest has valid format. Otherwise, returns an
