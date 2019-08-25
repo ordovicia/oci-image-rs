@@ -204,7 +204,9 @@ impl FromStr for Port {
             (port, protocol)
         };
 
-        let port = port.parse::<u16>().map_err(|e| ParsePortError { source: Some(e) })?;
+        let port = port
+            .parse::<u16>()
+            .map_err(|e| ParsePortError { source: Some(e) })?;
 
         match protocol {
             "udp" => Ok(Self::Udp { port }),
@@ -255,10 +257,8 @@ impl fmt::Display for ParsePortError {
 
 impl Error for ParsePortError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
-        match self.source {
-            Some(ref s) => Some(s),
-            None => None,
-        }
+        #[allow(trivial_casts)]
+        self.source.as_ref().map(|s| s as &_)
     }
 }
 
