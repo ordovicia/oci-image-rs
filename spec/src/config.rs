@@ -247,7 +247,7 @@ impl_serde_for_str_conv!(EnvVar);
 
 impl fmt::Display for ParsePortError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("Invalid port")?;
+        f.write_str("Failed to parse port")?;
         if let Some(ref s) = self.source {
             write!(f, ": {}", s)?;
         }
@@ -264,7 +264,7 @@ impl Error for ParsePortError {
 
 impl fmt::Display for ParseEnvVarError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("Invalid environment variable")
+        f.write_str("Failed to parse environment variable")
     }
 }
 
