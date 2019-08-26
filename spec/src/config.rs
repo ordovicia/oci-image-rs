@@ -204,7 +204,9 @@ impl FromStr for Port {
             (port, protocol)
         };
 
-        let port = port.parse::<u16>().map_err(|e| ParsePortError { source: Some(e) })?;
+        let port = port
+            .parse::<u16>()
+            .map_err(|e| ParsePortError { source: Some(e) })?;
 
         match protocol {
             "udp" => Ok(Self::Udp { port }),
@@ -245,7 +247,7 @@ impl_serde_for_str_conv!(EnvVar);
 
 impl fmt::Display for ParsePortError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("Invalid port")?;
+        f.write_str("Failed to parse port")?;
         if let Some(ref s) = self.source {
             write!(f, ": {}", s)?;
         }
@@ -255,16 +257,14 @@ impl fmt::Display for ParsePortError {
 
 impl Error for ParsePortError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
-        match self.source {
-            Some(ref s) => Some(s),
-            None => None,
-        }
+        #[allow(trivial_casts)]
+        self.source.as_ref().map(|s| s as &_)
     }
 }
 
 impl fmt::Display for ParseEnvVarError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("Invalid environment variable")
+        f.write_str("Failed to parse environment variable")
     }
 }
 
