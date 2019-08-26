@@ -153,7 +153,8 @@ pub const TYPE_LAYERS: &str = "layers";
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct RootFs {
     /// MUST be set to "layers".
-    pub r#type: String,
+    #[cfg_attr(feature = "serde", serde(rename = "type"))]
+    pub type_: String,
 
     /// Array of layer content hashes (DiffIDs), in order from first to last.
     pub diff_ids: Vec<Digest>,
@@ -388,7 +389,7 @@ mod tests {
                     stop_signal: None,
                 }),
                 rootfs: RootFs {
-                    r#type: TYPE_LAYERS.to_string(),
+                    type_: TYPE_LAYERS.to_string(),
                     diff_ids: [
                         "sha256:c6f988f4874bb0add23a778f753c65efe992244e148a1d2ec2a8b664fb66bbd1",
                         "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",
@@ -468,7 +469,7 @@ mod tests {
                     stop_signal: None,
                 }),
                 rootfs: RootFs {
-                    r#type: TYPE_LAYERS.to_string(),
+                    type_: TYPE_LAYERS.to_string(),
                     diff_ids: [
                         "sha256:c6f988f4874bb0add23a778f753c65efe992244e148a1d2ec2a8b664fb66bbd1",
                         "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef",

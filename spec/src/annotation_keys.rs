@@ -39,6 +39,7 @@ pub const LICENSE: &str = oci_image_key!("license");
 
 /// Name of the reference for a target.
 pub const REF_NAME: &str = oci_image_key!("ref.name");
+// TODO: validate (https://github.com/opencontainers/image-spec/blob/master/annotations.md#pre-defined-annotation-keys)
 
 /// Human-readable title of the image.
 pub const TITLE: &str = oci_image_key!("title");
