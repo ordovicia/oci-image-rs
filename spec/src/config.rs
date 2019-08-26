@@ -281,8 +281,7 @@ mod tests {
 
     #[test]
     fn test_image_deser() {
-        let json = r#"
-{
+        const JSON: &str = r#"{
     "created": "2015-10-31T22:22:56.015925234Z",
     "author": "Alyssa P. Hacker <alyspdev@example.com>",
     "architecture": "amd64",
@@ -333,10 +332,9 @@ mod tests {
         "empty_layer": true
       }
     ]
-}
-        "#;
+}"#;
 
-        let image: Image = serde_json::from_str(&json).unwrap();
+        let image: Image = serde_json::from_str(JSON).unwrap();
 
         assert_eq!(
             image,
@@ -494,9 +492,7 @@ mod tests {
                 ],
             };
 
-        assert_eq!(
-            serde_json::to_string_pretty(&image).unwrap(),
-            r#"{
+        const JSON: &str = r#"{
   "created": "2015-10-31T22:22:56.015925234+00:00",
   "author": "Alyssa P. Hacker <alyspdev@example.com>",
   "architecture": "amd64",
@@ -545,7 +541,8 @@ mod tests {
       "empty_layer": true
     }
   ]
-}"#
-        );
+}"#;
+
+        assert_eq!(serde_json::to_string_pretty(&image).unwrap(), JSON,);
     }
 }

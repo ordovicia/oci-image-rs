@@ -204,7 +204,7 @@ mod tests {
 
     #[test]
     fn test_descriptor_deser() {
-        let json = r#"
+        const JSON: &str = r#"
 {
   "mediaType": "application/vnd.oci.image.manifest.v1+json",
   "size": 7682,
@@ -215,7 +215,7 @@ mod tests {
 }
         "#;
 
-        let descriptor: Descriptor = serde_json::from_str(&json).unwrap();
+        let descriptor: Descriptor = serde_json::from_str(JSON).unwrap();
 
         assert_eq!(
             descriptor,
@@ -251,16 +251,18 @@ mod tests {
             annotations: Annotations::new(),
         };
 
-        assert_eq!(
-            serde_json::to_string_pretty(&descriptor).unwrap(),
-            r#"{
+            const JSON: &str = r#"{
   "mediaType": "application/vnd.oci.image.manifest.v1+json",
   "digest": "sha256:5b0bcabd1ed22e9fb1310cf6c2dec7cdef19f0ad69efa1f392e94a4333501270",
   "size": 7682,
   "urls": [
     "https://example.com/example-manifest"
   ]
-}"#
+}"#;
+
+        assert_eq!(
+            serde_json::to_string_pretty(&descriptor).unwrap(),
+            JSON,
         );
     }
 }

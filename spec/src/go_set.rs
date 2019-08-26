@@ -78,8 +78,8 @@ mod tests {
 
     #[test]
     fn test_go_set_deser() {
-        let json = r#"{ "zero": {}, "one": {}, "two": {} }"#;
-        let go_set: GoSet<String> = serde_json::from_str(&json).unwrap();
+        const JSON: &str = r#"{ "zero": {}, "one": {}, "two": {} }"#;
+        let go_set: GoSet<String> = serde_json::from_str(JSON).unwrap();
 
         assert_eq!(
             go_set,
@@ -97,7 +97,7 @@ mod tests {
             inner: [0, 1].iter().map(ToString::to_string).collect(),
         };
 
-        let json = serde_json::to_string(&go_set).unwrap();
-        assert!(json == r#"{"0":{},"1":{}}"# || json == r#"{"1":{},"0":{}}"#);
+        let actual = serde_json::to_string(&go_set).unwrap();
+        assert!(actual == r#"{"0":{},"1":{}}"# || actual == r#"{"1":{},"0":{}}"#);
     }
 }
