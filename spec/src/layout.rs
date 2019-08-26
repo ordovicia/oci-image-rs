@@ -37,8 +37,8 @@ mod tests {
 
     #[test]
     fn test_image_layout_deser() {
-        let json = r#"{"imageLayoutVersion":"1.0.0"}"#;
-        let image_layout: ImageLayout = serde_json::from_str(&json).unwrap();
+        const JSON: &str = r#"{"imageLayoutVersion":"1.0.0"}"#;
+        let image_layout: ImageLayout = serde_json::from_str(JSON).unwrap();
         assert_eq!(
             image_layout,
             ImageLayout {

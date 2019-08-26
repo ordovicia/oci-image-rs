@@ -45,8 +45,7 @@ mod tests {
 
     #[test]
     fn test_index_deser() {
-        let json = r#"
-{
+        const JSON: &str = r#"{
   "schemaVersion": 2,
   "manifests": [
     {
@@ -72,10 +71,9 @@ mod tests {
     "com.example.key1": "value1",
     "com.example.key2": "value2"
   }
-}
-"#;
+}"#;
 
-        let index: Index = serde_json::from_str(&json).unwrap();
+        let index: Index = serde_json::from_str(JSON).unwrap();
 
         assert_eq!(
             index,
@@ -177,9 +175,7 @@ mod tests {
             .collect::<Annotations>(),
         };
 
-        assert_eq!(
-            serde_json::to_string_pretty(&index).unwrap(),
-            r#"{
+        const JSON: &str = r#"{
   "schemaVersion": 2,
   "manifests": [
     {
@@ -204,7 +200,11 @@ mod tests {
   "annotations": {
     "com.example.key1": "value1"
   }
-}"#
+}"#;
+
+        assert_eq!(
+            serde_json::to_string_pretty(&index).unwrap(),
+            JSON,
         );
     }
 }

@@ -46,8 +46,7 @@ mod tests {
 
     #[test]
     fn test_manifest_deser() {
-        let json = r#"
-{
+        const JSON: &str = r#"{
   "schemaVersion": 2,
   "config": {
     "mediaType": "application/vnd.oci.image.config.v1+json",
@@ -75,10 +74,9 @@ mod tests {
     "com.example.key1": "value1",
     "com.example.key2": "value2"
   }
-}
-"#;
+}"#;
 
-        let manifest: Manifest = serde_json::from_str(&json).unwrap();
+        let manifest: Manifest = serde_json::from_str(JSON).unwrap();
 
         assert_eq!(
             manifest,
@@ -200,9 +198,7 @@ mod tests {
             .collect::<Annotations>(),
         };
 
-        assert_eq!(
-            serde_json::to_string_pretty(&manifest).unwrap(),
-            r#"{
+        const JSON: &str = r#"{
   "schemaVersion": 2,
   "config": {
     "mediaType": "application/vnd.oci.image.config.v1+json",
@@ -229,7 +225,11 @@ mod tests {
   "annotations": {
     "com.example.key1": "value1"
   }
-}"#
+}"#;
+
+        assert_eq!(
+            serde_json::to_string_pretty(&manifest).unwrap(),
+            JSON,
         );
     }
 }
