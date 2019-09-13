@@ -6,9 +6,6 @@
 
 use std::{error::Error, fmt, io, str::FromStr};
 
-use lazy_static::lazy_static;
-use regex::Regex;
-
 /// Digest, as a content identifier.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Digest {
@@ -30,6 +27,8 @@ pub enum Algorithm {
 }
 
 /// Error type for parsing a string into a `Digest`.
+///
+/// In a future version, this struct may have fields that convey the cause of error.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ParseError;
 
@@ -74,18 +73,23 @@ impl Digest {
         use Algorithm::*;
         use ValidateError::*;
 
+        fn is_sha2_char(c: char) -> bool {
+            match c as u8 {
+                b'a'..=b'f' | b'0'..=b'9' => true,
+                _ => false,
+            }
+        }
+
         match self.algorithm {
             Sha256 => {
-                lazy_static! {
-                    static ref RE: Regex = Regex::new("^[a-f0-9]{64}$").unwrap();
-                }
-                Ok(RE.is_match(&self.encoded))
+                // ^[a-f0-9]{64}$
+                let ok = self.encoded.len() == 64 && self.encoded.chars().all(is_sha2_char);
+                Ok(ok)
             }
             Sha512 => {
-                lazy_static! {
-                    static ref RE: Regex = Regex::new("^[a-f0-9]{128}$").unwrap();
-                }
-                Ok(RE.is_match(&self.encoded))
+                // ^[a-f0-9]{128}$
+                let ok = self.encoded.len() == 128 && self.encoded.chars().all(is_sha2_char);
+                Ok(ok)
             }
             Other(_) => Err(AlgorithmNotSupported),
         }
@@ -144,24 +148,32 @@ impl FromStr for Digest {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        lazy_static! {
-            static ref DIGEST_RE: Regex =
-                Regex::new("^[a-z0-9]+(?:[.+_-][a-z0-9]+)*:[a-zA-Z0-9=_-]+$").unwrap();
-        }
+        let mut colon_sp = s.split(':');
+        let algorithm = colon_sp.next().ok_or(ParseError)?;
+        let encoded = colon_sp.next().ok_or(ParseError)?;
 
-        if !DIGEST_RE.is_match(s) {
+        // ^[a-z0-9]+(?:[.+_-][a-z0-9]+)*:[a-zA-Z0-9=_-]+$
+        let alg_valid = algorithm
+            .split(|c| c == '+' || c == '.' || c == '_' || c == '-')
+            .all(|alg| {
+                !alg.is_empty()
+                    && alg
+                        .chars()
+                        .all(|c| c.is_ascii_digit() || c.is_ascii_lowercase())
+            });
+        let enc_valid = !encoded.is_empty()
+            && encoded
+                .chars()
+                .all(|c| c.is_ascii_alphanumeric() || c == '=' || c == '_' || c == '-');
+
+        if !alg_valid || !enc_valid {
             return Err(ParseError);
         }
 
-        let mut colon_sp = s.split(':');
-        let algorithm = colon_sp
-            .next()
-            .ok_or(ParseError)?
-            .parse::<Algorithm>()
-            .unwrap();
-        let encoded = colon_sp.next().ok_or(ParseError)?.to_string();
-
-        Ok(Digest { algorithm, encoded })
+        Ok(Digest {
+            algorithm: algorithm.parse::<Algorithm>().unwrap(),
+            encoded: encoded.to_string(),
+        })
     }
 }
 
