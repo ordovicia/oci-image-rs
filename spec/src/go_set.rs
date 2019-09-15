@@ -86,7 +86,6 @@ mod tests {
                 .iter()
                 .map(ToString::to_string)
                 .collect::<GoSet<_>>()
-                .into()
         );
     }
 

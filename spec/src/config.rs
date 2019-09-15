@@ -301,10 +301,7 @@ mod tests {
         ];
 
         for case in test_cases {
-            assert_eq!(
-                std::mem::discriminant(&Port::from_str(case).unwrap_err()),
-                std::mem::discriminant(&ParsePortError { source: None })
-            );
+            assert!(Port::from_str(case).is_err());
         }
     }
 
@@ -373,6 +370,8 @@ mod tests_serde {
 
     #[test]
     fn test_image_deser() {
+        #![allow(clippy::unreadable_literal)]
+
         const JSON: &str = r#"{
     "created": "2015-10-31T22:22:56.015925234Z",
     "author": "Alyssa P. Hacker <alyspdev@example.com>",
@@ -431,7 +430,7 @@ mod tests_serde {
         assert_eq!(
             image,
             Image {
-                created: FixedOffset::east(0).ymd(2015, 10, 31).and_hms_nano(22, 22, 56, 015925234),
+                created: FixedOffset::east(0).ymd(2015, 10, 31).and_hms_nano(22, 22, 56, 15925234),
                 author: Some("Alyssa P. Hacker <alyspdev@example.com>".to_string()),
                 architecture: Architecture::Amd64,
                 os: Os::Linux,
@@ -508,6 +507,7 @@ mod tests_serde {
 
     #[test]
     fn test_image_ser() {
+        #![allow(clippy::unreadable_literal)]
         // Not using zulu
 
         let image = Image {
