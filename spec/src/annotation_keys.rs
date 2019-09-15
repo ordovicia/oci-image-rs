@@ -39,7 +39,40 @@ pub const LICENSE: &str = oci_image_key!("license");
 
 /// Name of the reference for a target.
 pub const REF_NAME: &str = oci_image_key!("ref.name");
-// TODO: validate (https://github.com/opencontainers/image-spec/blob/master/annotations.md#pre-defined-annotation-keys)
+
+/// Validates the format of a reference.
+///
+/// Returns `true` if the reference has a valid format. Returns `false` if not.
+///
+/// # Examples
+///
+/// ```
+/// use oci_image_spec::annotation_keys::validate_ref_name;
+///
+/// assert!(validate_ref_name("stable-release"));
+/// assert!(validate_ref_name("v1.0"));
+/// ```
+pub fn validate_ref_name(ref_name: &str) -> bool {
+    // ref       ::= component ("/" component)*
+    // component ::= alphanum (separator alphanum)*
+    // alphanum  ::= [A-Za-z0-9]+
+    // separator ::= [-._:@+] | "--"
+
+    for component in ref_name.split('/') {
+        for dash_sp in component.split("--") {
+            for sp in dash_sp.split(|c| match c {
+                '-' | '.' | '_' | ':' | '@' | '+' => true,
+                _ => false,
+            }) {
+                if sp.is_empty() || sp.chars().any(|c| !c.is_ascii_alphanumeric()) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    true
+}
 
 /// Human-readable title of the image.
 pub const TITLE: &str = oci_image_key!("title");
@@ -81,4 +114,24 @@ pub mod label_schema {
 
     /// Compatible with `org.opencontainers.image.description` key.
     pub const DESCRIPTION: &str = label_schema_label!("description");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_validate_ref_name() {
+        assert!(validate_ref_name("stable/v1.0"));
+        assert!(validate_ref_name("stable-v1.0_pre:alpha@debug+0--tmp"));
+    }
+
+    #[test]
+    fn err_validate_ref_name() {
+        let test_cases = &["/", "stable/", "/v1.0", "-", "stable-", "-stable", "="];
+
+        for case in test_cases {
+            assert!(!validate_ref_name(case));
+        }
+    }
 }
