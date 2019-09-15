@@ -227,6 +227,7 @@ impl FromStr for EnvVar {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut equal_sp = s.split('=');
+
         let name = equal_sp.next().ok_or(ParseEnvVarError)?;
         let val = equal_sp.next().ok_or(ParseEnvVarError)?;
 
@@ -315,6 +316,51 @@ mod tests {
         let port = Port::Tcp { port: 8080 };
         assert_eq!(port.to_string(), "8080/tcp");
     }
+
+    #[test]
+    fn test_env_var_from_str() {
+        let env_var = EnvVar::from_str("name=val").unwrap();
+        assert_eq!(
+            env_var,
+            EnvVar {
+                name: "name".to_string(),
+                value: "val".to_string()
+            }
+        );
+
+        let env_var = EnvVar::from_str("name=").unwrap();
+        assert_eq!(
+            env_var,
+            EnvVar {
+                name: "name".to_string(),
+                value: String::new()
+            }
+        );
+    }
+
+    #[test]
+    fn err_env_var_from_str() {
+        let test_cases = &["", "=", "=val", "name-val", "name-"];
+
+        for case in test_cases {
+            assert_eq!(EnvVar::from_str(case).unwrap_err(), ParseEnvVarError);
+        }
+    }
+
+    #[test]
+    fn test_env_var_display() {
+        let env_var = EnvVar {
+            name: "name".to_string(),
+            value: "val".to_string(),
+        };
+        assert_eq!(env_var.to_string(), "name=val");
+
+        let env_var = EnvVar {
+            name: "name".to_string(),
+            value: String::new(),
+        };
+        assert_eq!(env_var.to_string(), "name=");
+    }
 }
 
 #[cfg(all(feature = "serde", test))]
@@ -322,7 +368,6 @@ mod tests_serde {
     use super::*;
     use crate::descriptor::{Architecture, Os};
     use chrono::TimeZone;
-    use std::string::ToString;
 
     // Example from https://github.com/opencontainers/image-spec/blob/master/config.md#example
 
