@@ -198,20 +198,17 @@ impl FromStr for Port {
     type Err = ParsePortError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (port, protocol) = {
-            let mut slash_sp = s.split('/');
-            let port = slash_sp.next().ok_or(ParsePortError { source: None })?;
-            let protocol = slash_sp.next().ok_or(ParsePortError { source: None })?;
-            (port, protocol)
-        };
+        let mut slash_sp = s.split('/');
 
-        let port = port
+        let port = slash_sp
+            .next()
+            .ok_or(ParsePortError { source: None })?
             .parse::<u16>()
             .map_err(|e| ParsePortError { source: Some(e) })?;
 
-        match protocol {
-            "udp" => Ok(Self::Udp { port }),
-            "tcp" => Ok(Self::Tcp { port }),
+        match (slash_sp.next(), slash_sp.next()) {
+            (Some("udp"), None) => Ok(Self::Udp { port }),
+            (Some("tcp"), None) | (None, None) => Ok(Self::Tcp { port }),
             _ => Err(ParsePortError { source: None }),
         }
     }
@@ -271,8 +268,57 @@ impl fmt::Display for ParseEnvVarError {
 
 impl Error for ParseEnvVarError {}
 
-#[cfg(all(feature = "serde", test))]
+#[cfg(test)]
 mod tests {
+    use super::*;
+
+    #[test]
+    fn test_port_from_str() {
+        let port = Port::from_str("2049/udp").unwrap();
+        assert_eq!(port, Port::Udp { port: 2049 });
+
+        let port = Port::from_str("8080/tcp").unwrap();
+        assert_eq!(port, Port::Tcp { port: 8080 });
+
+        let port = Port::from_str("8080").unwrap();
+        assert_eq!(port, Port::Tcp { port: 8080 });
+    }
+
+    #[test]
+    fn err_port_from_str() {
+        let test_cases = &[
+            "",
+            "/",
+            "/tcp",
+            "8080/",
+            "8080/tcp/",
+            "tcp/8080",
+            "8080-invalid",
+            "65536/tcp", // overflow
+            "8080/invalid",
+            "invalid/tcp",
+        ];
+
+        for case in test_cases {
+            assert_eq!(
+                std::mem::discriminant(&Port::from_str(case).unwrap_err()),
+                std::mem::discriminant(&ParsePortError { source: None })
+            );
+        }
+    }
+
+    #[test]
+    fn test_port_display() {
+        let port = Port::Udp { port: 2049 };
+        assert_eq!(port.to_string(), "2049/udp");
+
+        let port = Port::Tcp { port: 8080 };
+        assert_eq!(port.to_string(), "8080/tcp");
+    }
+}
+
+#[cfg(all(feature = "serde", test))]
+mod tests_serde {
     use super::*;
     use crate::descriptor::{Architecture, Os};
     use chrono::TimeZone;
