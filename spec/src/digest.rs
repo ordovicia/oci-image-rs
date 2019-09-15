@@ -4,7 +4,7 @@
 //!
 //! [OCI image spec]: https://github.com/opencontainers/image-spec/blob/master/descriptor.md#digests
 
-use std::{error::Error, fmt, io, str::FromStr};
+use std::{error::Error, fmt, io};
 
 /// Digest, as a content identifier.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -49,7 +49,7 @@ pub enum VerifyError {
 }
 
 impl Digest {
-    /// Validates the format of this digest.
+    /// Validates the format of this digest according to its digest algorithm.
     ///
     /// Returns `Ok(true)` if this digest has a valid format. Returns `Ok(false)` if does not.
     ///
@@ -144,7 +144,7 @@ impl fmt::Display for Digest {
     }
 }
 
-impl FromStr for Digest {
+impl std::str::FromStr for Digest {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -228,14 +228,34 @@ mod tests {
 
     #[test]
     fn test_digest_validate() {
+        // SHA-256 valid case is tested in doc
+
         let digest = Digest {
             algorithm: Sha512,
-            encoded: "401b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b372742".to_string(),
+            encoded: "f7fbba6e0636f890e56fbbf3283e524c6fa3204ae298382d624741d0dc6638326e282c41be5e4254d8820772c5518a2c5a8c0c7f7eda19594a7eb539453e1ed7".to_string(),
+        };
+        assert_eq!(digest.validate(), Ok(true));
+
+        // Length not match
+        let digest = Digest {
+            algorithm: Sha256,
+            encoded: "b0bcabd1ed22e9fb1310cf6c2dec7cdef19f0ad69efa1f392e94a4333501270".to_string(),
         };
         assert_eq!(digest.validate(), Ok(false));
 
+        // Invalid character
         let digest = Digest {
-            algorithm: Other("foo".to_string()),
+            algorithm: Sha512,
+            encoded: "g7fbba6e0636f890e56fbbf3283e524c6fa3204ae298382d624741d0dc6638326e282c41be5e4254d8820772c5518a2c5a8c0c7f7eda19594a7eb539453e1ed7".to_string(),
+        };
+        assert_eq!(digest.validate(), Ok(false));
+    }
+
+    #[test]
+    fn err_diget_validate() {
+        // Unsupported algorithm
+        let digest = Digest {
+            algorithm: Other("unsupported".to_string()),
             encoded: "6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b".to_string(),
         };
         assert_eq!(
@@ -248,14 +268,34 @@ mod tests {
     fn test_digest_verify() {
         let content = &b"foo"[..];
 
+        // SHA-256 verified case is tested in doc
+
+        let digest = Digest {
+            algorithm: Sha512,
+            encoded: "f7fbba6e0636f890e56fbbf3283e524c6fa3204ae298382d624741d0dc6638326e282c41be5e4254d8820772c5518a2c5a8c0c7f7eda19594a7eb539453e1ed7".to_string(),
+        };
+        assert_eq!(digest.verify(content).unwrap(), true);
+
         let digest = Digest {
             algorithm: Sha256,
             encoded: "1c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae".to_string(),
         };
-        assert!(!digest.verify(content).unwrap());
+        assert_eq!(digest.verify(content).unwrap(), false);
 
         let digest = Digest {
-            algorithm: Other("foo".to_string()),
+            algorithm: Sha512,
+            encoded: "g7fbba6e0636f890e56fbbf3283e524c6fa3204ae298382d624741d0dc6638326e282c41be5e4254d8820772c5518a2c5a8c0c7f7eda19594a7eb539453e1ed7".to_string(),
+        };
+        assert_eq!(digest.verify(content).unwrap(), false);
+    }
+
+    #[test]
+    fn err_digest_verify() {
+        let content = &b"foo"[..];
+
+        // Unsupported algorithm
+        let digest = Digest {
+            algorithm: Other("unsupported".to_string()),
             encoded: "2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae".to_string(),
         };
         assert_eq!(
