@@ -6,9 +6,6 @@
 
 use std::{error::Error, fmt, io, str::FromStr};
 
-use lazy_static::lazy_static;
-use regex::Regex;
-
 /// Digest, as a content identifier.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Digest {
@@ -30,6 +27,8 @@ pub enum Algorithm {
 }
 
 /// Error type for parsing a string into a `Digest`.
+///
+/// In a future version, this struct may have fields that convey the cause of error.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ParseError;
 
@@ -50,7 +49,7 @@ pub enum VerifyError {
 }
 
 impl Digest {
-    /// Validates the format of this digest.
+    /// Validates the format of this digest according to its digest algorithm.
     ///
     /// Returns `Ok(true)` if this digest has a valid format. Returns `Ok(false)` if does not.
     ///
@@ -74,18 +73,23 @@ impl Digest {
         use Algorithm::*;
         use ValidateError::*;
 
+        fn is_sha2_char(c: char) -> bool {
+            match c as u8 {
+                b'a'..=b'f' | b'0'..=b'9' => true,
+                _ => false,
+            }
+        }
+
         match self.algorithm {
             Sha256 => {
-                lazy_static! {
-                    static ref RE: Regex = Regex::new("^[a-f0-9]{64}$").unwrap();
-                }
-                Ok(RE.is_match(&self.encoded))
+                // ^[a-f0-9]{64}$
+                let ok = self.encoded.len() == 64 && self.encoded.chars().all(is_sha2_char);
+                Ok(ok)
             }
             Sha512 => {
-                lazy_static! {
-                    static ref RE: Regex = Regex::new("^[a-f0-9]{128}$").unwrap();
-                }
-                Ok(RE.is_match(&self.encoded))
+                // ^[a-f0-9]{128}$
+                let ok = self.encoded.len() == 128 && self.encoded.chars().all(is_sha2_char);
+                Ok(ok)
             }
             Other(_) => Err(AlgorithmNotSupported),
         }
@@ -144,24 +148,32 @@ impl FromStr for Digest {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        lazy_static! {
-            static ref DIGEST_RE: Regex =
-                Regex::new("^[a-z0-9]+(?:[.+_-][a-z0-9]+)*:[a-zA-Z0-9=_-]+$").unwrap();
-        }
+        let mut colon_sp = s.split(':');
+        let algorithm = colon_sp.next().ok_or(ParseError)?;
+        let encoded = colon_sp.next().ok_or(ParseError)?;
 
-        if !DIGEST_RE.is_match(s) {
+        // ^[a-z0-9]+(?:[.+_-][a-z0-9]+)*:[a-zA-Z0-9=_-]+$
+        let alg_valid = algorithm
+            .split(|c| c == '+' || c == '.' || c == '_' || c == '-')
+            .all(|alg| {
+                !alg.is_empty()
+                    && alg
+                        .chars()
+                        .all(|c| c.is_ascii_digit() || c.is_ascii_lowercase())
+            });
+        let enc_valid = !encoded.is_empty()
+            && encoded
+                .chars()
+                .all(|c| c.is_ascii_alphanumeric() || c == '=' || c == '_' || c == '-');
+
+        if !alg_valid || !enc_valid {
             return Err(ParseError);
         }
 
-        let mut colon_sp = s.split(':');
-        let algorithm = colon_sp
-            .next()
-            .ok_or(ParseError)?
-            .parse::<Algorithm>()
-            .unwrap();
-        let encoded = colon_sp.next().ok_or(ParseError)?.to_string();
-
-        Ok(Digest { algorithm, encoded })
+        Ok(Digest {
+            algorithm: algorithm.parse::<Algorithm>().unwrap(),
+            encoded: encoded.to_string(),
+        })
     }
 }
 
@@ -216,14 +228,34 @@ mod tests {
 
     #[test]
     fn test_digest_validate() {
+        // SHA-256 valid case is tested in doc
+
         let digest = Digest {
             algorithm: Sha512,
-            encoded: "401b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b372742".to_string(),
+            encoded: "f7fbba6e0636f890e56fbbf3283e524c6fa3204ae298382d624741d0dc6638326e282c41be5e4254d8820772c5518a2c5a8c0c7f7eda19594a7eb539453e1ed7".to_string(),
+        };
+        assert_eq!(digest.validate(), Ok(true));
+
+        // Length not match
+        let digest = Digest {
+            algorithm: Sha256,
+            encoded: "b0bcabd1ed22e9fb1310cf6c2dec7cdef19f0ad69efa1f392e94a4333501270".to_string(),
         };
         assert_eq!(digest.validate(), Ok(false));
 
+        // Invalid character
         let digest = Digest {
-            algorithm: Other("foo".to_string()),
+            algorithm: Sha512,
+            encoded: "g7fbba6e0636f890e56fbbf3283e524c6fa3204ae298382d624741d0dc6638326e282c41be5e4254d8820772c5518a2c5a8c0c7f7eda19594a7eb539453e1ed7".to_string(),
+        };
+        assert_eq!(digest.validate(), Ok(false));
+    }
+
+    #[test]
+    fn err_diget_validate() {
+        // Unsupported algorithm
+        let digest = Digest {
+            algorithm: Other("unsupported".to_string()),
             encoded: "6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b".to_string(),
         };
         assert_eq!(
@@ -236,14 +268,34 @@ mod tests {
     fn test_digest_verify() {
         let content = &b"foo"[..];
 
+        // SHA-256 verified case is tested in doc
+
+        let digest = Digest {
+            algorithm: Sha512,
+            encoded: "f7fbba6e0636f890e56fbbf3283e524c6fa3204ae298382d624741d0dc6638326e282c41be5e4254d8820772c5518a2c5a8c0c7f7eda19594a7eb539453e1ed7".to_string(),
+        };
+        assert_eq!(digest.verify(content).unwrap(), true);
+
         let digest = Digest {
             algorithm: Sha256,
             encoded: "1c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae".to_string(),
         };
-        assert!(!digest.verify(content).unwrap());
+        assert_eq!(digest.verify(content).unwrap(), false);
 
         let digest = Digest {
-            algorithm: Other("foo".to_string()),
+            algorithm: Sha512,
+            encoded: "g7fbba6e0636f890e56fbbf3283e524c6fa3204ae298382d624741d0dc6638326e282c41be5e4254d8820772c5518a2c5a8c0c7f7eda19594a7eb539453e1ed7".to_string(),
+        };
+        assert_eq!(digest.verify(content).unwrap(), false);
+    }
+
+    #[test]
+    fn err_digest_verify() {
+        let content = &b"foo"[..];
+
+        // Unsupported algorithm
+        let digest = Digest {
+            algorithm: Other("unsupported".to_string()),
             encoded: "2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae".to_string(),
         };
         assert_eq!(
@@ -251,17 +303,11 @@ mod tests {
             std::mem::discriminant(&VerifyError::AlgorithmNotSupported)
         );
     }
-}
-
-#[cfg(all(feature = "serde", test))]
-mod tests_serde {
-    use super::*;
-    use Algorithm::*;
 
     #[test]
-    fn test_digest_deser() {
-        let digest: Digest = serde_json::from_str(
-            r#""sha256:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b""#,
+    fn test_digest_parse() {
+        let digest = Digest::from_str(
+            "sha256:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
         )
         .unwrap();
         assert_eq!(
@@ -273,10 +319,10 @@ mod tests_serde {
             }
         );
 
-        let digest: Digest = serde_json::from_str(
-            r#""sha512:401b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b372742""#, // encoded part has invalid length
-        )
-        .unwrap();
+        // Encoded part has invalid length, but parsing passes
+        let digest =
+            Digest::from_str("sha512:401b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b372742")
+                .unwrap();
         assert_eq!(
             digest,
             Digest {
@@ -285,10 +331,9 @@ mod tests_serde {
             }
         );
 
-        let digest: Digest = serde_json::from_str(
-            r#""multihash+base58:QmRZxt2b1FVZPNqd8hsiykDL3TdBDeTSPX9Kv46HmX4Gx8""#,
-        )
-        .unwrap();
+        let digest =
+            Digest::from_str("multihash+base58:QmRZxt2b1FVZPNqd8hsiykDL3TdBDeTSPX9Kv46HmX4Gx8")
+                .unwrap();
         assert_eq!(
             digest,
             Digest {
@@ -299,23 +344,49 @@ mod tests_serde {
     }
 
     #[test]
-    fn test_digest_ser() {
+    fn err_digest_from_str() {
+        let test_cases = &[
+            // missing parts
+            "",
+            "sha256:",
+            ":6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
+            // invalid algorithm-encoded separator
+            "sha256+6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
+            // invalid algirothm char
+            "X:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
+            // invalid algorithm separator
+            "sha256/sha512:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
+            // leading/trailing algorithm separator
+            "-sha256:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
+            "sha256-:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
+            // invalid encoded char
+            "sha256:/c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
+        ];
+
+        for case in test_cases {
+            assert_eq!(Digest::from_str(case).unwrap_err(), ParseError);
+        }
+    }
+
+    #[test]
+    fn test_digest_display() {
         let digest = Digest {
             algorithm: Sha256,
             encoded: "6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b".to_string(),
         };
         assert_eq!(
-            serde_json::to_string(&digest).unwrap(),
-            r#""sha256:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b""#
+            digest.to_string(),
+            "sha256:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b"
         );
 
+        // Encoded part has invalid length, but to_string passes
         let digest = Digest {
             algorithm: Sha512,
             encoded: "401b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b372742".to_string(),
         };
         assert_eq!(
-            serde_json::to_string(&digest).unwrap(),
-            r#""sha512:401b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b372742""#, // encoded part has invalid length
+            digest.to_string(),
+            "sha512:401b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b372742"
         );
 
         let digest = Digest {
@@ -323,8 +394,8 @@ mod tests_serde {
             encoded: "LCa0a2j_xo_5m0U8HTBBNBNCLXBkg7-g-YpeiGJm564".to_string(),
         };
         assert_eq!(
-            serde_json::to_string(&digest).unwrap(),
-            r#""sha256+b64u:LCa0a2j_xo_5m0U8HTBBNBNCLXBkg7-g-YpeiGJm564""#,
+            digest.to_string(),
+            "sha256+b64u:LCa0a2j_xo_5m0U8HTBBNBNCLXBkg7-g-YpeiGJm564"
         );
     }
 }
