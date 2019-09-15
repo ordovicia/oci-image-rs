@@ -198,20 +198,17 @@ impl FromStr for Port {
     type Err = ParsePortError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (port, protocol) = {
-            let mut slash_sp = s.split('/');
-            let port = slash_sp.next().ok_or(ParsePortError { source: None })?;
-            let protocol = slash_sp.next().ok_or(ParsePortError { source: None })?;
-            (port, protocol)
-        };
+        let mut slash_sp = s.split('/');
 
-        let port = port
+        let port = slash_sp
+            .next()
+            .ok_or(ParsePortError { source: None })?
             .parse::<u16>()
             .map_err(|e| ParsePortError { source: Some(e) })?;
 
-        match protocol {
-            "udp" => Ok(Self::Udp { port }),
-            "tcp" => Ok(Self::Tcp { port }),
+        match (slash_sp.next(), slash_sp.next()) {
+            (Some("udp"), None) => Ok(Self::Udp { port }),
+            (Some("tcp"), None) | (None, None) => Ok(Self::Tcp { port }),
             _ => Err(ParsePortError { source: None }),
         }
     }
