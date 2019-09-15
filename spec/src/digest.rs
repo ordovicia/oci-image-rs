@@ -4,7 +4,7 @@
 //!
 //! [OCI image spec]: https://github.com/opencontainers/image-spec/blob/master/descriptor.md#digests
 
-use std::{error::Error, fmt, io};
+use std::{error::Error, fmt, io, str::FromStr};
 
 /// Digest, as a content identifier.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -144,7 +144,7 @@ impl fmt::Display for Digest {
     }
 }
 
-impl std::str::FromStr for Digest {
+impl FromStr for Digest {
     type Err = ParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -303,17 +303,11 @@ mod tests {
             std::mem::discriminant(&VerifyError::AlgorithmNotSupported)
         );
     }
-}
-
-#[cfg(all(feature = "serde", test))]
-mod tests_serde {
-    use super::*;
-    use Algorithm::*;
 
     #[test]
-    fn test_digest_deser() {
-        let digest: Digest = serde_json::from_str(
-            r#""sha256:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b""#,
+    fn test_digest_parse() {
+        let digest = Digest::from_str(
+            "sha256:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
         )
         .unwrap();
         assert_eq!(
@@ -325,10 +319,10 @@ mod tests_serde {
             }
         );
 
-        let digest: Digest = serde_json::from_str(
-            r#""sha512:401b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b372742""#, // encoded part has invalid length
-        )
-        .unwrap();
+        // Encoded part has invalid length, but parsing passes
+        let digest =
+            Digest::from_str("sha512:401b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b372742")
+                .unwrap();
         assert_eq!(
             digest,
             Digest {
@@ -337,10 +331,9 @@ mod tests_serde {
             }
         );
 
-        let digest: Digest = serde_json::from_str(
-            r#""multihash+base58:QmRZxt2b1FVZPNqd8hsiykDL3TdBDeTSPX9Kv46HmX4Gx8""#,
-        )
-        .unwrap();
+        let digest =
+            Digest::from_str("multihash+base58:QmRZxt2b1FVZPNqd8hsiykDL3TdBDeTSPX9Kv46HmX4Gx8")
+                .unwrap();
         assert_eq!(
             digest,
             Digest {
@@ -351,23 +344,49 @@ mod tests_serde {
     }
 
     #[test]
-    fn test_digest_ser() {
+    fn err_digest_from_str() {
+        let test_cases = &[
+            // missing parts
+            "",
+            "sha256:",
+            ":6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
+            // invalid algorithm-encoded separator
+            "sha256+6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
+            // invalid algirothm char
+            "X:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
+            // invalid algorithm separator
+            "sha256/sha512:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
+            // leading/trailing algorithm separator
+            "-sha256:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
+            "sha256-:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
+            // invalid encoded char
+            "sha256:/c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
+        ];
+
+        for case in test_cases {
+            assert_eq!(Digest::from_str(case).unwrap_err(), ParseError);
+        }
+    }
+
+    #[test]
+    fn test_digest_display() {
         let digest = Digest {
             algorithm: Sha256,
             encoded: "6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b".to_string(),
         };
         assert_eq!(
-            serde_json::to_string(&digest).unwrap(),
-            r#""sha256:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b""#
+            digest.to_string(),
+            "sha256:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b"
         );
 
+        // Encoded part has invalid length, but to_string passes
         let digest = Digest {
             algorithm: Sha512,
             encoded: "401b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b372742".to_string(),
         };
         assert_eq!(
-            serde_json::to_string(&digest).unwrap(),
-            r#""sha512:401b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b372742""#, // encoded part has invalid length
+            digest.to_string(),
+            "sha512:401b09eab3c013d4ca54922bb802bec8fd5318192b0a75f201d8b372742"
         );
 
         let digest = Digest {
@@ -375,8 +394,8 @@ mod tests_serde {
             encoded: "LCa0a2j_xo_5m0U8HTBBNBNCLXBkg7-g-YpeiGJm564".to_string(),
         };
         assert_eq!(
-            serde_json::to_string(&digest).unwrap(),
-            r#""sha256+b64u:LCa0a2j_xo_5m0U8HTBBNBNCLXBkg7-g-YpeiGJm564""#,
+            digest.to_string(),
+            "sha256+b64u:LCa0a2j_xo_5m0U8HTBBNBNCLXBkg7-g-YpeiGJm564"
         );
     }
 }
