@@ -51,7 +51,7 @@ pub enum VerifyError {
 impl Digest {
     /// Validates the format of this digest according to its digest algorithm.
     ///
-    /// Returns `Ok(true)` if this digest has a valid format. Returns `Ok(false)` if does not.
+    /// Returns `Ok(true)` if this digest has a valid format. Returns `Ok(false)` if not.
     ///
     /// # Errors
     ///
@@ -71,7 +71,6 @@ impl Digest {
     /// ```
     pub fn validate(&self) -> Result<bool, ValidateError> {
         use Algorithm::*;
-        use ValidateError::*;
 
         fn is_sha2_char(c: char) -> bool {
             match c as u8 {
@@ -91,13 +90,13 @@ impl Digest {
                 let ok = self.encoded.len() == 128 && self.encoded.chars().all(is_sha2_char);
                 Ok(ok)
             }
-            Other(_) => Err(AlgorithmNotSupported),
+            Other(_) => Err(ValidateError::AlgorithmNotSupported),
         }
     }
 
     /// Verifies a content with this digest.
     ///
-    /// Returns `Ok(true)` if the content is verified. Returns `Ok(false)` if not verified.
+    /// Returns `Ok(true)` if the content is verified. Returns `Ok(false)` if not.
     ///
     /// # Errors
     ///
@@ -252,7 +251,7 @@ mod tests {
     }
 
     #[test]
-    fn err_diget_validate() {
+    fn err_digest_validate() {
         // Unsupported algorithm
         let digest = Digest {
             algorithm: Other("unsupported".to_string()),
@@ -352,7 +351,7 @@ mod tests {
             ":6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
             // invalid algorithm-encoded separator
             "sha256+6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
-            // invalid algirothm char
+            // invalid algorithm char
             "X:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
             // invalid algorithm separator
             "sha256/sha512:6c3c624b58dbbcd3c0dd82b4c53f04194d1247c6eebdaab7c610cf7d66709b3b",
