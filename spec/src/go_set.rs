@@ -74,7 +74,6 @@ impl<'de, T: Eq + Hash + Deserialize<'de>> serde::Deserialize<'de> for GoSet<T> 
 #[cfg(all(feature = "serde", test))]
 mod tests {
     use super::*;
-    use std::string::ToString;
 
     #[test]
     fn test_go_set_deser() {
