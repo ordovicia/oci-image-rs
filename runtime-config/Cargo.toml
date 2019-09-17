@@ -1,19 +1,14 @@
 [package]
-name = "oci-image-spec"
+name = "oci-runtime-config"
 version = "0.1.0"
 authors = ["Hidehito Yabuuchi <hdht.ybuc@gmail.com>"]
 edition = "2018"
 
 [features]
-default = ["serde", "deps-serde"]
-deps-serde = ["chrono/serde", "url/serde"]
+default = ["serde"]
 
 [dependencies]
-chrono = "0.4.7"
-hex = "0.3.2"
 serde = { version = "1.0.98", features = ["derive"], optional = true }
-sha2 = "0.8.0"
-url = "2.1.0"
 
 [dev-dependencies]
 serde_json = "1.0.40"

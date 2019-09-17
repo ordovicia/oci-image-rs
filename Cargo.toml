@@ -2,4 +2,5 @@
 members = [
     "image-spec",
     "image-unpack",
+    "runtime-config",
 ]
