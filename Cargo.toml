@@ -1,5 +1,5 @@
 [workspace]
 members = [
-    "spec",
-    "convert",
+    "image-spec",
+    "image-unpack",
 ]

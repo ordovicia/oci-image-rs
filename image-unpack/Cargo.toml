@@ -1,8 +1,8 @@
 [package]
-name = "oci-image-convert"
+name = "oci-image-unpack"
 version = "0.1.0"
 authors = ["Hidehito Yabuuchi <hdht.ybuc@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-spec = { package = "oci-image-spec", path = "../spec" }
+image-spec = { package = "oci-image-spec", path = "../image-spec" }
