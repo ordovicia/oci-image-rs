@@ -1,3 +1,16 @@
+#![warn(
+    future_incompatible,
+    // missing_docs,
+    missing_debug_implementations,
+    nonstandard_style,
+    rust_2018_idioms,
+    trivial_casts,
+    trivial_numeric_casts,
+    unused
+)]
+
+mod linux;
+
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
