@@ -202,9 +202,6 @@ mod tests {
   }
 }"#;
 
-        assert_eq!(
-            serde_json::to_string_pretty(&index).unwrap(),
-            JSON,
-        );
+        assert_eq!(serde_json::to_string_pretty(&index).unwrap(), JSON);
     }
 }
