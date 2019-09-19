@@ -84,9 +84,14 @@ pub struct Platform {
     // pub features: Vec<String>,
 }
 
-/// Pre-defined and other OSs.
+/// Pre-defined types of OSs.
 // Listed on https://golang.org/doc/install/source#environment
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(rename_all = "lowercase")
+)]
 pub enum Os {
     /// Android.
     Android,
@@ -108,13 +113,16 @@ pub enum Os {
     Solaris,
     /// Windows.
     Windows,
-    /// Other (not pre-defined) OS.
-    Other(String),
 }
 
-/// Pre-defined and other architectures.
+/// Pre-defined types of architectures.
 // Listed on https://golang.org/doc/install/source#environment
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(rename_all = "lowercase")
+)]
 pub enum Architecture {
     /// x86 64-bit.
     Amd64,
@@ -137,12 +145,15 @@ pub enum Architecture {
     Ppc64Le,
     /// IBM System z 64-bit, big-endian.
     S390X,
-    /// Other (not pre-defined) architecture.
-    Other(String),
 }
 
-/// Pre-defined and other variants of CPU.
+/// Pre-defined variants of CPUs.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(rename_all = "lowercase")
+)]
 pub enum CpuVariant {
     /// Arm 32-bit, v6.
     V6,
@@ -150,49 +161,9 @@ pub enum CpuVariant {
     V7,
     /// Arm 32/64-bit, v8.
     V8,
-    /// Other (not pre-defined) CPU variant.
-    Other(String),
 }
 
 // pub const WIN_32K: &str = "win32k";
-
-impl_str_conv! {
-    Os,
-    (Android, "android"),
-    (Darwin, "darwin"),
-    (DragonFly, "dragonfly"),
-    (FreeBsd, "freebsd"),
-    (Linux, "linux"),
-    (NetBsd, "netbsd"),
-    (OpenBsd, "openbsd"),
-    (Plan9, "plan9"),
-    (Solaris, "solaris"),
-    (Windows, "windows")
-}
-impl_serde_for_str_conv!(Os);
-
-impl_str_conv! {
-    Architecture,
-    (Amd64, "amd64"),
-    (Arm, "arm"),
-    (Arm64, "arm64"),
-    (i386, "386"),
-    (Mips, "mips"),
-    (Mips64, "mips64"),
-    (MipsLe, "mipsle"),
-    (Ppc64, "ppc64"),
-    (Ppc64Le, "ppc64le"),
-    (S390X, "s390x")
-}
-impl_serde_for_str_conv!(Architecture);
-
-impl_str_conv! {
-    CpuVariant,
-    (V6, "v6"),
-    (V7, "v7"),
-    (V8, "v8")
-}
-impl_serde_for_str_conv!(CpuVariant);
 
 #[cfg(all(feature = "serde", test))]
 mod tests {
@@ -251,7 +222,7 @@ mod tests {
             annotations: Annotations::new(),
         };
 
-            const JSON: &str = r#"{
+        const JSON: &str = r#"{
   "mediaType": "application/vnd.oci.image.manifest.v1+json",
   "digest": "sha256:5b0bcabd1ed22e9fb1310cf6c2dec7cdef19f0ad69efa1f392e94a4333501270",
   "size": 7682,
@@ -260,9 +231,6 @@ mod tests {
   ]
 }"#;
 
-        assert_eq!(
-            serde_json::to_string_pretty(&descriptor).unwrap(),
-            JSON,
-        );
+        assert_eq!(serde_json::to_string_pretty(&descriptor).unwrap(), JSON);
     }
 }
