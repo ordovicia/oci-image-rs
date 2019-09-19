@@ -6,8 +6,8 @@ use std::collections::HashMap;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// Set of `T` values. Serialization and de-serialization result is equivalent to those of Go type
-/// `map[string]struct{}`.
+/// Set of `T` values. Results of serialization and de-serialization are equivalent to those of Go
+/// language type `map[string]struct{}`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GoSet<T: Eq + Hash> {
     inner: HashSet<T>,

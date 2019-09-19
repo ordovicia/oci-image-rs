@@ -1,4 +1,4 @@
-//! OCI image schema definitions and validation functions.
+//! OCI image schema in Rust.
 //!
 //! For more information about the spec, see the [OCI image spec].
 //!

@@ -7,6 +7,14 @@
 use std::{error::Error, fmt, io, str::FromStr};
 
 /// Digest, as a content identifier.
+///
+/// `Digest` has two methods: [`validate`] and [`verify`]. `validate` validates the format of a
+/// digest, and `verify` verifies a given content with a digest.
+///
+/// Currently, `validate` and `verify` support SHA-256 and SHA-512 hash algorithms.
+///
+/// [`validate`]: #method.validate
+/// [`verify`]: #method.verify
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Digest {
     /// Hash algorithm.
