@@ -27,13 +27,13 @@ pub enum MediaType {
     Other(String),
 }
 
-macro_rules! impl_str_conv_ {
+macro_rules! _impl_str_conv {
     ( $( ($v: ident, $s: literal) ),* ) => {
         impl_str_conv!(MediaType, $( ( $v, concat!("application/vnd.oci.", $s) ) ),* );
     };
 }
 
-impl_str_conv_! {
+_impl_str_conv! {
     (ContentDescriptor, "descriptor.v1+json"),
     (OciLayout, "layout.header.v1+json"),
     (ImageIndex, "image.index.v1+json"),
