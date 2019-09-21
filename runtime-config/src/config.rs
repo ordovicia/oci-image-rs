@@ -170,31 +170,31 @@ pub struct Capabilities {
         feature = "serde",
         serde(skip_serializing_if = "Vec::is_empty", default)
     )]
-    pub effective: Vec<CapabilityType>,
+    pub effective: Vec<Capability>,
 
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Vec::is_empty", default)
     )]
-    pub bounding: Vec<CapabilityType>,
+    pub bounding: Vec<Capability>,
 
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Vec::is_empty", default)
     )]
-    pub inheritable: Vec<CapabilityType>,
+    pub inheritable: Vec<Capability>,
 
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Vec::is_empty", default)
     )]
-    pub permitted: Vec<CapabilityType>,
+    pub permitted: Vec<Capability>,
 
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Vec::is_empty", default)
     )]
-    pub ambient: Vec<CapabilityType>,
+    pub ambient: Vec<Capability>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -203,7 +203,7 @@ pub struct Capabilities {
     derive(Serialize, Deserialize),
     serde(rename_all = "SCREAMING_SNAKE_CASE")
 )]
-pub enum CapabilityType {
+pub enum Capability {
     CapAuditControl,
     CapAuditRead,
     CapAuditWrite,
@@ -285,19 +285,4 @@ pub struct Hook {
 
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub timeout: Option<u32>,
-}
-
-#[cfg(all(feature = "serde", test))]
-mod tests {
-    // use super::*;
-
-    #[test]
-    fn test_config_ser() {
-        // TODO
-    }
-
-    #[test]
-    fn test_config_deser() {
-        // TODO
-    }
 }

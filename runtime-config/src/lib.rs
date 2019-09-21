@@ -15,11 +15,26 @@
     unused
 )]
 
-mod config;
-mod linux;
+pub mod config;
+pub mod linux;
 
 pub use config::Config;
 pub use linux::LinuxConfig;
 
 // /// Schema version for the current specification.
 // pub const SCHEMA_VERSION: u32 = 2;
+
+#[cfg(all(feature = "serde", test))]
+mod tests {
+    // use super::*;
+
+    #[test]
+    fn test_config_ser() {
+        // TODO
+    }
+
+    #[test]
+    fn test_config_deser() {
+        // TODO
+    }
+}
