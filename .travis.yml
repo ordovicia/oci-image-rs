@@ -17,6 +17,6 @@ matrix:
 script:
   - cargo build --verbose --all
   - cargo test --verbose --all
-    # `--all --no-default-features` does not work intuitively
-    # https://github.com/rust-lang/cargo/issues/5364
+  # --no-default-features for spec
+  - cargo build --verbose --manifest-path spec/Cargo.toml --no-default-features
   - cargo test --verbose --manifest-path spec/Cargo.toml --no-default-features

@@ -5,14 +5,15 @@ authors = ["Hidehito Yabuuchi <hdht.ybuc@gmail.com>"]
 edition = "2018"
 
 [features]
-default = ["serde"]
+default = ["serde", "deps-serde"]
+deps-serde = ["chrono/serde", "url/serde"]
 
 [dependencies]
-chrono = { version = "0.4.7", features = ["serde"] }
+chrono = "0.4.7"
 hex = "0.3.2"
-sha2 = "0.8.0"
 serde = { version = "1.0.98", features = ["derive"], optional = true }
-url = { version = "2.1.0", features = ["serde"] }
+sha2 = "0.8.0"
+url = "2.1.0"
 
 [dev-dependencies]
 serde_json = "1.0.40"
