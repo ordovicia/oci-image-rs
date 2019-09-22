@@ -175,8 +175,31 @@ mod tests {
 
     #[test]
     fn test_descriptor_deser() {
-        const JSON: &str = r#"
-{
+        const JSON: &str = r#"{
+  "mediaType": "application/vnd.oci.image.manifest.v1+json",
+  "size": 7682,
+  "digest": "sha256:5b0bcabd1ed22e9fb1310cf6c2dec7cdef19f0ad69efa1f392e94a4333501270"
+}
+"#;
+
+        let descriptor: Descriptor = serde_json::from_str(JSON).unwrap();
+
+        assert_eq!(
+            descriptor,
+            Descriptor {
+                media_type: MediaType::ImageManifest,
+                digest: Digest::from_str(
+                    "sha256:5b0bcabd1ed22e9fb1310cf6c2dec7cdef19f0ad69efa1f392e94a4333501270"
+                )
+                .unwrap(),
+                size: 7682,
+                urls: vec![],
+                platform: None,
+                annotations: Annotations::new(),
+            }
+        );
+
+        const JSON_WITH_URL: &str = r#"{
   "mediaType": "application/vnd.oci.image.manifest.v1+json",
   "size": 7682,
   "digest": "sha256:5b0bcabd1ed22e9fb1310cf6c2dec7cdef19f0ad69efa1f392e94a4333501270",
@@ -186,7 +209,7 @@ mod tests {
 }
         "#;
 
-        let descriptor: Descriptor = serde_json::from_str(JSON).unwrap();
+        let descriptor: Descriptor = serde_json::from_str(JSON_WITH_URL).unwrap();
 
         assert_eq!(
             descriptor,
@@ -215,6 +238,26 @@ mod tests {
             )
             .unwrap(),
             size: 7682,
+            urls: vec![],
+            platform: None,
+            annotations: Annotations::new(),
+        };
+
+        const JSON: &str = r#"{
+  "mediaType": "application/vnd.oci.image.manifest.v1+json",
+  "digest": "sha256:5b0bcabd1ed22e9fb1310cf6c2dec7cdef19f0ad69efa1f392e94a4333501270",
+  "size": 7682
+}"#;
+
+        assert_eq!(serde_json::to_string_pretty(&descriptor).unwrap(), JSON);
+
+        let descriptor = Descriptor {
+            media_type: MediaType::ImageManifest,
+            digest: Digest::from_str(
+                "sha256:5b0bcabd1ed22e9fb1310cf6c2dec7cdef19f0ad69efa1f392e94a4333501270",
+            )
+            .unwrap(),
+            size: 7682,
             urls: vec!["https://example.com/example-manifest"
                 .parse::<Url>()
                 .unwrap()],
@@ -222,7 +265,7 @@ mod tests {
             annotations: Annotations::new(),
         };
 
-        const JSON: &str = r#"{
+        const JSON_WITH_URL: &str = r#"{
   "mediaType": "application/vnd.oci.image.manifest.v1+json",
   "digest": "sha256:5b0bcabd1ed22e9fb1310cf6c2dec7cdef19f0ad69efa1f392e94a4333501270",
   "size": 7682,
@@ -231,6 +274,9 @@ mod tests {
   ]
 }"#;
 
-        assert_eq!(serde_json::to_string_pretty(&descriptor).unwrap(), JSON);
+        assert_eq!(
+            serde_json::to_string_pretty(&descriptor).unwrap(),
+            JSON_WITH_URL
+        );
     }
 }
