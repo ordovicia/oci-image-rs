@@ -2,7 +2,7 @@
 ///
 /// See the [OCI image spec] for more information.
 ///
-/// [OCI image spec]: https://github.com/opencontainers/image-spec/blob/master/media-types.md
+/// [OCI image spec]: https://github.com/opencontainers/image-spec/blob/v1.0.1/media-types.md
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum MediaType {
     /// Content descriptor,

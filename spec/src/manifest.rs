@@ -7,7 +7,7 @@ use crate::{Annotations, Descriptor};
 ///
 /// See the [OCI image spec] for more information.
 ///
-/// [OCI image spec]: https://github.com/opencontainers/image-spec/blob/master/manifest.md
+/// [OCI image spec]: https://github.com/opencontainers/image-spec/blob/v1.0.1/manifest.md
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(
     feature = "serde",
@@ -42,7 +42,7 @@ mod tests {
     use crate::{Digest, MediaType};
     use std::str::FromStr;
 
-    // Example from https://github.com/opencontainers/image-spec/blob/master/manifest.md#example-image-manifest
+    // Example from https://github.com/opencontainers/image-spec/blob/v1.0.1/manifest.md#example-image-manifest
 
     #[test]
     fn test_manifest_deser() {

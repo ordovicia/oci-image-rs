@@ -2,7 +2,7 @@
 //!
 //! See the [OCI image spec] for more information.
 //!
-//! [OCI image spec]: https://github.com/opencontainers/image-spec/blob/master/descriptor.md
+//! [OCI image spec]: https://github.com/opencontainers/image-spec/blob/v1.0.1/descriptor.md
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
@@ -171,7 +171,7 @@ mod tests {
     use crate::Descriptor;
     use std::str::FromStr;
 
-    // Example from https://github.com/opencontainers/image-spec/blob/master/descriptor.md#examples
+    // Example from https://github.com/opencontainers/image-spec/blob/v1.0.1/descriptor.md#examples
 
     #[test]
     fn test_descriptor_deser() {

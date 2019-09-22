@@ -1,8 +1,9 @@
 //! OCI image schema in Rust.
 //!
-//! For more information about the spec, see the [OCI image spec].
+//! Schema in this crate is based on the v1.0.1 release of the OCI image spec. See the
+//! [OCI image spec] for more information about the spec.
 //!
-//! [OCI image spec]: https://github.com/opencontainers/image-spec/blob/master/spec.md
+//! [OCI image spec]: https://github.com/opencontainers/image-spec/releases/tag/v1.0.1
 
 #![warn(
     future_incompatible,

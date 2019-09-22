@@ -6,7 +6,7 @@ use crate::{Annotations, Descriptor};
 /// Image index.
 /// See the [OCI image spec] for more information.
 ///
-/// [OCI image spec]: https://github.com/opencontainers/image-spec/blob/master/image-index.md
+/// [OCI image spec]: https://github.com/opencontainers/image-spec/blob/v1.0.1/image-index.md
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(
     feature = "serde",
@@ -41,7 +41,7 @@ mod tests {
     };
     use std::str::FromStr;
 
-    // Example from https://github.com/opencontainers/image-spec/blob/master/image-index.md#example-image-index
+    // Example from https://github.com/opencontainers/image-spec/blob/v1.0.1/image-index.md#example-image-index
 
     #[test]
     fn test_index_deser() {
