@@ -2,7 +2,7 @@
 //!
 //! See the [OCI image spec] for more information.
 //!
-//! [OCI image spec]: https://github.com/opencontainers/image-spec/blob/master/descriptor.md#digests
+//! [OCI image spec]: https://github.com/opencontainers/image-spec/blob/v1.0.1/descriptor.md#digests
 
 use std::{error::Error, fmt, io, str::FromStr};
 

@@ -2,7 +2,7 @@
 //!
 //! See the [OCI image spec] for more information.
 //!
-//! [OCI image spec]: https://github.com/opencontainers/image-spec/blob/master/annotations.md#pre-defined-annotation-keys
+//! [OCI image spec]: https://github.com/opencontainers/image-spec/blob/v1.0.1/annotations.md#pre-defined-annotation-keys
 
 macro_rules! oci_image_key {
     ($s: literal) => {

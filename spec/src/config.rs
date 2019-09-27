@@ -2,7 +2,7 @@
 //!
 //! See the [OCI image spec] for more information.
 //!
-//! [OCI image spec]: https://github.com/opencontainers/image-spec/blob/master/config.md
+//! [OCI image spec]: https://github.com/opencontainers/image-spec/blob/v1.0.1/config.md
 
 use std::{error::Error, fmt, str::FromStr};
 
@@ -366,7 +366,7 @@ mod tests_serde {
     use crate::descriptor::{Architecture, Os};
     use chrono::TimeZone;
 
-    // Example from https://github.com/opencontainers/image-spec/blob/master/config.md#example
+    // Example from https://github.com/opencontainers/image-spec/blob/v1.0.1/config.md#example
 
     #[test]
     fn test_image_deser() {

@@ -2,7 +2,7 @@
 //!
 //! See the [OCI image spec] for more information.
 //!
-//! [OCI image spec]: https://github.com/opencontainers/image-spec/blob/master/image-layout.md
+//! [OCI image spec]: https://github.com/opencontainers/image-spec/blob/v1.0.1/image-layout.md
 
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
