@@ -372,60 +372,7 @@ mod tests_serde {
     fn test_image_deser() {
         #![allow(clippy::unreadable_literal)]
 
-        const JSON: &str = r#"{
-    "created": "2015-10-31T22:22:56.015925234Z",
-    "author": "Alyssa P. Hacker <alyspdev@example.com>",
-    "architecture": "amd64",
-    "os": "linux",
-    "config": {
-        "User": "alice",
-        "ExposedPorts": {
-            "8080/tcp": {}
-        },
-        "Env": [
-            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-            "FOO=oci_is_a",
-            "BAR=well_written_spec"
-        ],
-        "Entrypoint": [
-            "/bin/my-app-binary"
-        ],
-        "Cmd": [
-            "--foreground",
-            "--config",
-            "/etc/my-app.d/default.cfg"
-        ],
-        "Volumes": {
-            "/var/job-result-data": {},
-            "/var/log/my-app-logs": {}
-        },
-        "WorkingDir": "/home/alice",
-        "Labels": {
-            "com.example.project.git.url": "https://example.com/project.git",
-            "com.example.project.git.commit": "45a939b2999782a3f005621a8d0f29aa387e1d6b"
-        }
-    },
-    "rootfs": {
-      "diff_ids": [
-        "sha256:c6f988f4874bb0add23a778f753c65efe992244e148a1d2ec2a8b664fb66bbd1",
-        "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
-      ],
-      "type": "layers"
-    },
-    "history": [
-      {
-        "created": "2015-10-31T22:22:54.690851953Z",
-        "created_by": "/bin/sh -c #(nop) ADD file:a3bc1e842b69636f9df5256c49c5374fb4eef1e281fe3f282c65fb853ee171c5 in /"
-      },
-      {
-        "created": "2015-10-31T22:22:55.613815829Z",
-        "created_by": "/bin/sh -c #(nop) CMD [\"sh\"]",
-        "empty_layer": true
-      }
-    ]
-}"#;
-
-        let image: Image = serde_json::from_str(JSON).unwrap();
+        let image: Image = serde_json::from_str(JSON_DESER).unwrap();
 
         assert_eq!(
             image,
@@ -508,7 +455,6 @@ mod tests_serde {
     #[test]
     fn test_image_ser() {
         #![allow(clippy::unreadable_literal)]
-        // Not using zulu
 
         let image = Image {
                 created: FixedOffset::east(0).ymd(2015, 10, 31).and_hms_nano(22, 22, 56, 15925234),
@@ -584,7 +530,64 @@ mod tests_serde {
                 ],
             };
 
-        const JSON: &str = r#"{
+        assert_eq!(serde_json::to_string_pretty(&image).unwrap(), JSON_SER);
+    }
+
+    const JSON_DESER: &str = r#"{
+  "created": "2015-10-31T22:22:56.015925234Z",
+  "author": "Alyssa P. Hacker <alyspdev@example.com>",
+  "architecture": "amd64",
+  "os": "linux",
+  "config": {
+    "User": "alice",
+    "ExposedPorts": {
+      "8080/tcp": {}
+    },
+    "Env": [
+      "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "FOO=oci_is_a",
+      "BAR=well_written_spec"
+    ],
+    "Entrypoint": [
+      "/bin/my-app-binary"
+    ],
+    "Cmd": [
+      "--foreground",
+      "--config",
+      "/etc/my-app.d/default.cfg"
+    ],
+    "Volumes": {
+      "/var/job-result-data": {},
+      "/var/log/my-app-logs": {}
+    },
+    "WorkingDir": "/home/alice",
+    "Labels": {
+      "com.example.project.git.url": "https://example.com/project.git",
+      "com.example.project.git.commit": "45a939b2999782a3f005621a8d0f29aa387e1d6b"
+    }
+  },
+  "rootfs": {
+    "diff_ids": [
+      "sha256:c6f988f4874bb0add23a778f753c65efe992244e148a1d2ec2a8b664fb66bbd1",
+      "sha256:5f70bf18a086007016e948b04aed3b82103a36bea41755b6cddfaf10ace3c6ef"
+    ],
+    "type": "layers"
+  },
+  "history": [
+    {
+      "created": "2015-10-31T22:22:54.690851953Z",
+      "created_by": "/bin/sh -c #(nop) ADD file:a3bc1e842b69636f9df5256c49c5374fb4eef1e281fe3f282c65fb853ee171c5 in /"
+    },
+    {
+      "created": "2015-10-31T22:22:55.613815829Z",
+      "created_by": "/bin/sh -c #(nop) CMD [\"sh\"]",
+      "empty_layer": true
+    }
+  ]
+}"#;
+
+    // Not using zulu
+    const JSON_SER: &str = r#"{
   "created": "2015-10-31T22:22:56.015925234+00:00",
   "author": "Alyssa P. Hacker <alyspdev@example.com>",
   "architecture": "amd64",
@@ -634,7 +637,4 @@ mod tests_serde {
     }
   ]
 }"#;
-
-        assert_eq!(serde_json::to_string_pretty(&image).unwrap(), JSON,);
-    }
 }
