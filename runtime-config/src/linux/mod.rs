@@ -141,16 +141,14 @@ pub enum NamespaceType {
 
 /// User namespace ID mappings from a host to a container.
 #[derive(Debug, Clone, PartialEq, Eq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(Serialize, Deserialize),
-    serde(rename_all = "camelCase")
-)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct UserNamespaceMappings {
     /// Starting ID on the host to be mapped to `container_id`.
+    #[cfg_attr(feature = "serde", serde(rename = "hostID"))]
     pub host_id: u32,
 
     /// Starting ID in the container.
+    #[cfg_attr(feature = "serde", serde(rename = "containerID"))]
     pub container_id: u32,
 
     /// Number of IDs to be mapped.

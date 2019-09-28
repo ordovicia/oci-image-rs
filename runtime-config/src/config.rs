@@ -11,7 +11,11 @@ use std::{collections::HashMap, path::PathBuf};
 
 /// Runtime configuration schema.
 #[derive(Debug, Clone, PartialEq, Eq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(rename_all = "camelCase")
+)]
 pub struct Config {
     /// Version of the OCI runtime spec.
     pub oci_version: String,
@@ -35,13 +39,6 @@ pub struct Config {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub hostname: Option<String>,
 
-    /// Linux-specific configuration.
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub linux: Option<crate::LinuxConfig>,
-
-    // TODO: windows
-    // TODO: solaris
-    //
     /// [POSIX] Set of hooks for configuring custom actions related to the lifecycle of the container.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub hooks: Option<Hooks>,
@@ -52,6 +49,12 @@ pub struct Config {
         serde(skip_serializing_if = "HashMap::is_empty", default)
     )]
     pub annotations: HashMap<String, String>,
+
+    /// Linux-specific configuration.
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+    pub linux: Option<crate::LinuxConfig>,
+    // TODO: windows
+    // TODO: solaris
 }
 
 /// Container's root filesystem.

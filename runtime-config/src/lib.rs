@@ -27,7 +27,7 @@ pub const OCI_VERSION: &str = "1.0.1";
 
 #[cfg(all(feature = "serde", test))]
 mod tests {
-    // use super::*;
+    use super::*;
 
     #[test]
     fn test_config_ser() {
@@ -36,6 +36,8 @@ mod tests {
 
     #[test]
     fn test_config_deser() {
+        let _config: Config = serde_json::from_str(JSON_DESER).unwrap();
+
         // TODO
     }
 
