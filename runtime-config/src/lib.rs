@@ -23,7 +23,7 @@ pub use config::Config;
 pub use linux::LinuxConfig;
 
 /// Version of OCI runtime spec on which this crate is based.
-pub const OCI_VERSION: &str = "0.1.0";
+pub const OCI_VERSION: &str = "1.0.1";
 
 #[cfg(all(feature = "serde", test))]
 mod tests {

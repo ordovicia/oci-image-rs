@@ -1,7 +1,9 @@
 {
     "cSpell.words": [
         "apparmor",
+        "bitmask",
         "cgroup",
+        "cgroups",
         "chown",
         "chrono",
         "chroot",
@@ -11,6 +13,8 @@
         "deser",
         "deserializer",
         "entrypoint",
+        "execv",
+        "execvp",
         "fowner",
         "freebsd",
         "fsetid",
@@ -47,6 +51,9 @@
         "setuid",
         "solaris",
         "spdx",
-        "syslog"
+        "sysctl",
+        "syslog",
+        "unbindable",
+        "unbuffered"
     ],
 }

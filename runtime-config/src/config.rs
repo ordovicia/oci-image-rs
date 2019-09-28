@@ -111,15 +111,17 @@ pub struct Process {
     /// As which user the process runs.
     pub user: User,
 
-    /// Working directory that will be set for the executable.
+    /// Absolute path to the working directory that will be set for the executable.
     pub cwd: PathBuf,
 
+    /// Environment variables for the process, with similar semantics to IEEE Std 1003.1-2008's `environ`.
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Vec::is_empty", default)
     )]
     pub env: Vec<String>,
 
+    /// Arguments for the process, with similar semantics to IEEE Std 1003.1-2008 `execvp`'s `argv`.
     pub args: Vec<String>,
 
     /// [POSIX] Resource limits for the process.
@@ -161,9 +163,10 @@ pub struct Process {
 /// Console size in characters of a terminal.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-#[allow(missing_docs)]
 pub struct ConsoleSize {
+    /// Height of the console in characters of the terminal.
     pub height: usize,
+    /// Width of the console in characters of the terminal.
     pub width: usize,
 }
 
@@ -326,14 +329,19 @@ pub struct Hooks {
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Hook {
+    /// Absolute path to the executable, with similar semantics to IEEE Std 1003.1-2008 `execv`'s
+    /// `path`.
     pub path: PathBuf,
 
+    /// Arguments for the executable, with similar semantics to IEEE Std 1003.1-2008 `execv`'s
+    /// `argv`.
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Vec::is_empty", default)
     )]
     pub args: Vec<String>,
 
+    /// Environment variables for the executable, with similar semantics to IEEE Std 1003.1-2008's `environ`.
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Vec::is_empty", default)

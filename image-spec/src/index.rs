@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::{Annotations, Descriptor};
 
 /// Image index.
+///
 /// See the [OCI image spec] for more information.
 ///
 /// [OCI image spec]: https://github.com/opencontainers/image-spec/blob/v1.0.1/image-index.md

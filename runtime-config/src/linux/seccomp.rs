@@ -29,6 +29,7 @@ pub struct Seccomp {
     derive(Serialize, Deserialize),
     serde(rename_all = "SCREAMING_SNAKE_CASE")
 )]
+// #[allow(missing_docs)]
 pub enum Action {
     ScmpActKill,
     ScmpActTrap,
@@ -43,6 +44,7 @@ pub enum Action {
     derive(Serialize, Deserialize),
     serde(rename_all = "SCREAMING_SNAKE_CASE")
 )]
+// #[allow(missing_docs)]
 pub enum Architecture {
     ScmpArchX86,
     ScmpArchX86_64,
@@ -99,6 +101,7 @@ pub struct SyscallArg {
     derive(Serialize, Deserialize),
     serde(rename_all = "SCREAMING_SNAKE_CASE")
 )]
+// #[allow(missing_docs)]
 pub enum SyscallArgOp {
     ScmpCmpNe,
     ScmpCmpLt,
