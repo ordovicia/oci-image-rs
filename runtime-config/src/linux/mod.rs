@@ -1,3 +1,9 @@
+//! Schema of Linux-specific config section.
+//!
+//! For more information about the spec, see the [OCI runtime spec for Linux-specific section].
+//!
+//! [OCI runtime spec for Linux-specific section]: https://github.com/opencontainers/runtime-spec/blob/v1.0.0/config-linux.md
+
 pub mod resources;
 pub mod seccomp;
 
@@ -10,10 +16,6 @@ use std::{collections::HashMap, path::PathBuf};
 use serde::{Deserialize, Serialize};
 
 /// Schema of Linux-specific config section.
-///
-/// For more information about the spec, see the [OCI runtime spec for Linux-specific section].
-///
-/// [OCI runtime spec for Linux-specific section]: https://github.com/opencontainers/runtime-spec/blob/v1.0.0/config-linux.md
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(
     feature = "serde",
@@ -83,7 +85,7 @@ pub struct LinuxConfig {
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Namespace {
     #[cfg_attr(feature = "serde", serde(rename = "type"))]
-    pub type_: String,
+    pub type_: NamespaceType,
 
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub path: Option<PathBuf>,

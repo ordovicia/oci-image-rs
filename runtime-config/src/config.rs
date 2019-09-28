@@ -31,16 +31,22 @@ pub struct Config {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub process: Option<Process>,
 
+    /// Container's hostname as seen by processes running inside the container.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub hostname: Option<String>,
 
+    /// Linux-specific configuration.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub linux: Option<crate::LinuxConfig>,
+
     // TODO: windows
     // TODO: solaris
+    //
+    /// [POSIX] Set of hooks for configuring custom actions related to the lifecycle of the container.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub hooks: Option<Hooks>,
 
+    /// Arbitrary metadata for the container.
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "HashMap::is_empty", default)
@@ -72,7 +78,7 @@ pub struct Mount {
         feature = "serde",
         serde(rename = "type", skip_serializing_if = "Option::is_none")
     )]
-    pub type_: Option<String>,
+    pub type_: Option<String>, // TODO: Use proper type?
 
     /// Device name, directory name, or dummy.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
@@ -131,7 +137,7 @@ pub struct Process {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub apparmor_profile: Option<String>,
 
-    // [Linux]
+    /// [Linux] Set of capabilities for the process.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub capabilities: Option<Capabilities>,
 
@@ -192,7 +198,7 @@ pub struct User {
 pub struct Rlimit {
     /// Type of platform resource being limited.
     #[cfg_attr(feature = "serde", serde(rename = "type"))]
-    pub type_: String,
+    pub type_: String, // TODO: Use proper type?
 
     /// Value of the limit enforced for the corresponding resource.
     pub soft: u64,
@@ -201,33 +207,39 @@ pub struct Rlimit {
     pub hard: u64,
 }
 
+/// Set of capabilities for a container process.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Capabilities {
+    /// Effective capabilities that are kept for the process.
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Vec::is_empty", default)
     )]
     pub effective: Vec<Capability>,
 
+    /// Bounding capabilities that are kept for the process.
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Vec::is_empty", default)
     )]
     pub bounding: Vec<Capability>,
 
+    /// Inheritable capabilities that are kept for the process.
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Vec::is_empty", default)
     )]
     pub inheritable: Vec<Capability>,
 
+    /// Permitted capabilities that are kept for the process.
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Vec::is_empty", default)
     )]
     pub permitted: Vec<Capability>,
 
+    /// Ambient capabilities that are kept for the process.
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Vec::is_empty", default)
@@ -235,12 +247,14 @@ pub struct Capabilities {
     pub ambient: Vec<Capability>,
 }
 
+/// Valid kinds of capabilities.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(
     feature = "serde",
     derive(Serialize, Deserialize),
     serde(rename_all = "SCREAMING_SNAKE_CASE")
 )]
+#[allow(missing_docs)]
 pub enum Capability {
     CapAuditControl,
     CapAuditRead,
@@ -282,21 +296,25 @@ pub enum Capability {
     CapWakeAlarm,
 }
 
+/// Set of hooks for configuring custom actions related to the lifecycle of a container.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Hooks {
+    /// Pre-start hooks.
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Vec::is_empty", default)
     )]
     pub prestart: Vec<Hook>,
 
+    /// Post-start hooks.
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Vec::is_empty", default)
     )]
     pub poststart: Vec<Hook>,
 
+    /// Post-stop hooks.
     #[cfg_attr(
         feature = "serde",
         serde(skip_serializing_if = "Vec::is_empty", default)
@@ -304,6 +322,7 @@ pub struct Hooks {
     pub poststop: Vec<Hook>,
 }
 
+/// Hook for configuring custom actions related to the lifecycle of a container.
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Hook {
@@ -321,6 +340,7 @@ pub struct Hook {
     )]
     pub env: Vec<String>,
 
+    /// The number of seconds before aborting the hook.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub timeout: Option<u32>,
 }
