@@ -81,6 +81,9 @@ pub struct Device {
 }
 
 /// Types of devices.
+///
+/// When the feature `serde` is enabled, `DeviceType` can be serialized to / deserialized from a
+/// single character representing the device type (i.e. `a`, `c`, or `b`).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum DeviceType {

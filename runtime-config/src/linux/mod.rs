@@ -71,6 +71,7 @@ pub struct LinuxConfig {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "HashMap::is_empty"))]
     pub sysctl: HashMap<String, String>,
 
+    /// Seccomp config for the container.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub seccomp: Option<Seccomp>,
 
@@ -191,6 +192,9 @@ pub struct Device {
 }
 
 /// Device type.
+///
+/// When the feature `serde` is enabled, `DeviceType` can be serialized to / deserialized from a
+/// single character representing the device type (e.g. `c`, `b`).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum DeviceType {

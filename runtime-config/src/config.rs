@@ -254,6 +254,9 @@ pub struct Capabilities {
 }
 
 /// Valid kinds of capabilities.
+///
+/// When the feature `serde` is enabled, `Capability` can be serialized to / deserialized from a
+/// name of a capability in a SCREAMING_SNAKE_CASE (e.g. `CAP_AUDIT_CONTROL`).
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(
     feature = "serde",
