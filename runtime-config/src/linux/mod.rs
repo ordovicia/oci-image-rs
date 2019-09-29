@@ -55,6 +55,7 @@ pub struct LinuxConfig {
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub cgroups_path: Option<PathBuf>,
 
+    /// Resource limits for the container forced by cgroups.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub resources: Option<Resources>,
 
@@ -193,15 +194,15 @@ pub struct Device {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum DeviceType {
-    /// Character device.
+    /// Character device (type `c`).
     #[cfg_attr(feature = "serde", serde(rename = "c"))]
     Character,
 
-    /// Block device.
+    /// Block device (type `b`).
     #[cfg_attr(feature = "serde", serde(rename = "b"))]
     Block,
 
-    /// Unbuffered device.
+    /// Unbuffered device (type `u`).
     #[cfg_attr(feature = "serde", serde(rename = "u"))]
     Unbuffered,
 
