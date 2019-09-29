@@ -35,53 +35,118 @@ pub struct Seccomp {
 
 /// Types of actions for seccomp rules.
 ///
-/// When the feature `serde` is enabled, `Action` can be serialized to / deserialized from a name of
-/// an action in a SCREAMING_SNAKE_CASE (e.g. `SCMP_ACT_KILL`).
+/// When the feature `serde` is enabled, `Action` can be serialized to / deserialized from an action
+/// name as defined in libseccomp (e.g. `SCMP_ACT_KILL`).
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(
     feature = "serde",
     derive(Serialize, Deserialize),
     serde(rename_all = "SCREAMING_SNAKE_CASE")
 )]
-#[allow(missing_docs)]
 pub enum Action {
-    ScmpActKill,
-    ScmpActTrap,
-    ScmpActErrno,
-    ScmpActTrace,
-    ScmpActAllow,
+    /// `SCMP_ACT_KILL`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ACT_KILL"))]
+    Kill,
+
+    /// `SCMP_ACT_TRAP`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ACT_TRAP"))]
+    Trap,
+
+    /// `SCMP_ACT_ERRNO`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ACT_ERRNO"))]
+    Errno,
+
+    /// `SCMP_ACT_TRACE`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ACT_TRACE"))]
+    Trace,
+
+    /// `SCMP_ACT_ALLOW`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ACT_ALLOW"))]
+    Allow,
 }
 
 /// List of architectures used for system calls.
 ///
-/// When the feature `serde` is enabled, `Architecture` can be serialized to / deserialized from a
-/// name of an action in a SCREAMING_SNAKE_CASE (e.g. `SCMP_ARCH_X86`).
+/// When the feature `serde` is enabled, `Architecture` can be serialized to / deserialized from an
+/// architecture name as defined in libseccomp (e.g. `SCMP_ARCH_X86`).
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(
     feature = "serde",
     derive(Serialize, Deserialize),
     serde(rename_all = "SCREAMING_SNAKE_CASE")
 )]
-#[allow(missing_docs)]
 pub enum Architecture {
-    ScmpArchX86,
-    ScmpArchX86_64,
-    ScmpArchX32,
-    ScmpArchArm,
-    ScmpArchAarch64,
-    ScmpArchMips,
-    ScmpArchMips64,
-    ScmpArchMips64n32,
-    ScmpArchMipsel,
-    ScmpArchMipsel64,
-    ScmpArchMipsel64n32,
-    ScmpArchPpc,
-    ScmpArchPpc64,
-    ScmpArchPpc64le,
-    ScmpArchS390,
-    ScmpArchS390x,
-    ScmpArchParisc,
-    ScmpArchParisc64,
+    /// `SCMP_ARCH_X86`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ARCH_X86"))]
+    X86,
+
+    /// `SCMP_ARCH_X86_64`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ARCH_X86_64"))]
+    X86_64,
+
+    /// `SCMP_ARCH_X32`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ARCH_X32"))]
+    X32,
+
+    /// `SCMP_ARCH_ARM`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ARCH_ARM"))]
+    Arm,
+
+    /// `SCMP_ARCH_AARCH64`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ARCH_AARCH64"))]
+    Aarch64,
+
+    /// `SCMP_ARCH_MIPS`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ARCH_MIPS"))]
+    Mips,
+
+    /// `SCMP_ARCH_MIPS64`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ARCH_MIPS64"))]
+    Mips64,
+
+    /// `SCMP_ARCH_MIPS64N32`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ARCH_MIPS64N32"))]
+    Mips64n32,
+
+    /// `SCMP_ARCH_MIPSEL`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ARCH_MIPSEL"))]
+    Mipsel,
+
+    /// `SCMP_ARCH_MIPSEL64`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ARCH_MIPSEL64"))]
+    Mipsel64,
+
+    /// `SCMP_ARCH_MIPSEL64N32`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ARCH_MIPSEL64N32"))]
+    Mipsel64n32,
+
+    /// `SCMP_ARCH_PPC`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ARCH_PPC"))]
+    Ppc,
+
+    /// `SCMP_ARCH_PPC64`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ARCH_PPC64"))]
+    Ppc64,
+
+    /// `SCMP_ARCH_PPC64LE`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ARCH_PPC64LE"))]
+    Ppc64le,
+
+    /// `SCMP_ARCH_S390`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ARCH_S390"))]
+    S390,
+
+    /// `SCMP_ARCH_S390X`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ARCH_S390X"))]
+    S390X,
+
+    /// `SCMP_ARCH_PARISC`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ARCH_PARISC"))]
+    Parisc,
+
+    /// `SCMP_ARCH_PARISC64`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_ARCH_PARISC64"))]
+    Parisc64,
 }
 
 /// List of system call filters in seccomp.
@@ -125,19 +190,41 @@ pub struct SyscallArg {
 }
 
 /// Comparator for system call arguments in seccomp.
+///
+/// When the feature `serde` is enabled, `SyscallCmp` can be serialized to / deserialized from an
+/// comparator name as defined in libseccomp (e.g. `SCMP_CMP_NE`).
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 #[cfg_attr(
     feature = "serde",
     derive(Serialize, Deserialize),
     serde(rename_all = "SCREAMING_SNAKE_CASE")
 )]
-#[allow(missing_docs)]
 pub enum SyscallCmp {
-    ScmpCmpNe,
-    ScmpCmpLt,
-    ScmpCmpLe,
-    ScmpCmpEq,
-    ScmpCmpGe,
-    ScmpCmpGt,
-    ScmpCmpMaskedEq,
+    /// `SCMP_CMP_NE`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_CMP_NE"))]
+    Ne,
+
+    /// `SCMP_CMP_LT`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_CMP_LT"))]
+    Lt,
+
+    /// `SCMP_CMP_LE`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_CMP_LE"))]
+    Le,
+
+    /// `SCMP_CMP_EQ`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_CMP_EQ"))]
+    Eq,
+
+    /// `SCMP_CMP_GE`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_CMP_GE"))]
+    Ge,
+
+    /// `SCMP_CMP_GT`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_CMP_GT"))]
+    Gt,
+
+    /// `SCMP_CMP_MASKED_EQ`
+    #[cfg_attr(feature = "serde", serde(rename = "SCMP_CMP_MASKED_EQ"))]
+    MaskedEq,
 }

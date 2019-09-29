@@ -27,6 +27,7 @@
         "hms",
         "hugepage",
         "iops",
+        "libseccomp",
         "lifecycle",
         "mipsel",
         "mipsle",
