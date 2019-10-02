@@ -93,7 +93,7 @@ pub enum DeviceType {
 
     /// Character device (type `c`).
     #[cfg_attr(feature = "serde", serde(rename = "c"))]
-    Char,
+    Character,
 
     /// Block device (type `b`).
     #[cfg_attr(feature = "serde", serde(rename = "b"))]

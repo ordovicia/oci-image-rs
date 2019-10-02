@@ -28,6 +28,7 @@ pub const OCI_VERSION: &str = "1.0.1";
 #[cfg(all(feature = "serde", test))]
 mod tests {
     use super::*;
+    use std::path::PathBuf;
 
     #[test]
     fn test_config_ser() {
@@ -36,9 +37,381 @@ mod tests {
 
     #[test]
     fn test_config_deser() {
-        let _config: Config = serde_json::from_str(JSON_DESER).unwrap();
+        let config: Config = serde_json::from_str(JSON_DESER).unwrap();
 
-        // TODO
+        assert_eq!(
+            config,
+            Config {
+                oci_version: String::from("0.5.0-dev"),
+                root: Some(config::Root {
+                    path: PathBuf::from("rootfs"),
+                    readonly: Some(true),
+                }),
+                mounts: vec![
+                    config::Mount {
+                        destination: PathBuf::from("/proc"),
+                        type_: Some(String::from("proc")),
+                        source: Some(PathBuf::from("proc")),
+                        options: vec![],
+                    },
+                    config::Mount {
+                        destination: PathBuf::from("/dev"),
+                        type_: Some(String::from("tmpfs")),
+                        source: Some(PathBuf::from("tmpfs")),
+                        options: vec![
+                            String::from("nosuid"),
+                            String::from("strictatime"),
+                            String::from("mode=755"),
+                            String::from("size=65536k"),
+                        ],
+                    },
+                    config::Mount {
+                        destination: PathBuf::from("/dev/pts"),
+                        type_: Some(String::from("devpts")),
+                        source: Some(PathBuf::from("devpts")),
+                        options: vec![
+                            String::from("nosuid"),
+                            String::from("noexec"),
+                            String::from("newinstance"),
+                            String::from("ptmxmode=0666"),
+                            String::from("mode=0620"),
+                            String::from("gid=5"),
+                        ],
+                    },
+                    config::Mount {
+                        destination: PathBuf::from("/dev/shm"),
+                        type_: Some(String::from("tmpfs")),
+                        source: Some(PathBuf::from("shm")),
+                        options: vec![
+                            String::from("nosuid"),
+                            String::from("noexec"),
+                            String::from("nodev"),
+                            String::from("mode=1777"),
+                            String::from("size=65536k"),
+                        ],
+                    },
+                    config::Mount {
+                        destination: PathBuf::from("/dev/mqueue"),
+                        type_: Some(String::from("mqueue")),
+                        source: Some(PathBuf::from("mqueue")),
+                        options: vec![
+                            String::from("nosuid"),
+                            String::from("noexec"),
+                            String::from("nodev"),
+                        ],
+                    },
+                    config::Mount {
+                        destination: PathBuf::from("/sys"),
+                        type_: Some(String::from("sysfs")),
+                        source: Some(PathBuf::from("sysfs")),
+                        options: vec![
+                            String::from("nosuid"),
+                            String::from("noexec"),
+                            String::from("nodev"),
+                        ],
+                    },
+                    config::Mount {
+                        destination: PathBuf::from("/sys/fs/cgroup"),
+                        type_: Some(String::from("cgroup")),
+                        source: Some(PathBuf::from("cgroup")),
+                        options: vec![
+                            String::from("nosuid"),
+                            String::from("noexec"),
+                            String::from("nodev"),
+                            String::from("relatime"),
+                            String::from("ro"),
+                        ],
+                    },
+                ],
+                process: Some(config::Process {
+                    terminal: Some(true),
+                    console_size: None,
+                    user: config::User {
+                        uid: 1,
+                        gid: 1,
+                        additional_gids: vec![5, 6],
+                        username: None,
+                    },
+                    cwd: PathBuf::from("/"),
+                    env: vec![
+                        String::from(
+                            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                        ),
+                        String::from("TERM=xterm"),
+                    ],
+                    args: vec![String::from("sh")],
+                    rlimits: vec![
+                        config::Rlimit {
+                            type_: String::from("RLIMIT_CORE"),
+                            hard: 1024,
+                            soft: 1024,
+                        },
+                        config::Rlimit {
+                            type_: String::from("RLIMIT_NOFILE"),
+                            hard: 1024,
+                            soft: 1024,
+                        },
+                    ],
+                    apparmor_profile: Some(String::from("acme_secure_profile")),
+                    capabilities: Some(config::Capabilities {
+                        bounding: vec![
+                            config::Capability::AuditWrite,
+                            config::Capability::Kill,
+                            config::Capability::NetBindService,
+                        ],
+                        permitted: vec![
+                            config::Capability::AuditWrite,
+                            config::Capability::Kill,
+                            config::Capability::NetBindService,
+                        ],
+                        inheritable: vec![
+                            config::Capability::AuditWrite,
+                            config::Capability::Kill,
+                            config::Capability::NetBindService,
+                        ],
+                        effective: vec![config::Capability::AuditWrite, config::Capability::Kill],
+                        ambient: vec![config::Capability::NetBindService],
+                    }),
+                    no_new_privileges: Some(true),
+                    oom_score_adj: Some(100),
+                    selinux_label: Some(String::from(
+                        "system_u:system_r:svirt_lxc_net_t:s0:c124,c675",
+                    )),
+                }),
+                hostname: Some(String::from("slartibartfast")),
+                hooks: Some(config::Hooks {
+                    prestart: vec![
+                        config::Hook {
+                            path: PathBuf::from("/usr/bin/fix-mounts"),
+                            args: vec![
+                                String::from("fix-mounts"),
+                                String::from("arg1"),
+                                String::from("arg2"),
+                            ],
+                            env: vec![String::from("key1=value1")],
+                            timeout: None,
+                        },
+                        config::Hook {
+                            path: PathBuf::from("/usr/bin/setup-network"),
+                            args: vec![],
+                            env: vec![],
+                            timeout: None,
+                        },
+                    ],
+                    poststart: vec![config::Hook {
+                        path: PathBuf::from("/usr/bin/notify-start"),
+                        args: vec![],
+                        env: vec![],
+                        timeout: Some(5),
+                    }],
+                    poststop: vec![config::Hook {
+                        path: PathBuf::from("/usr/sbin/cleanup.sh"),
+                        args: vec![String::from("cleanup.sh"), String::from("-f")],
+                        env: vec![],
+                        timeout: None,
+                    }],
+                }),
+                annotations: [
+                    (String::from("com.example.key1"), String::from("value1")),
+                    (String::from("com.example.key2"), String::from("value2")),
+                ]
+                .iter()
+                .cloned()
+                .collect(),
+                linux: Some(linux::LinuxConfig {
+                    namespaces: vec![
+                        linux::Namespace {
+                            type_: linux::NamespaceType::Pid,
+                            path: None,
+                        },
+                        linux::Namespace {
+                            type_: linux::NamespaceType::Network,
+                            path: None,
+                        },
+                        linux::Namespace {
+                            type_: linux::NamespaceType::Ipc,
+                            path: None,
+                        },
+                        linux::Namespace {
+                            type_: linux::NamespaceType::Uts,
+                            path: None,
+                        },
+                        linux::Namespace {
+                            type_: linux::NamespaceType::Mount,
+                            path: None,
+                        },
+                        linux::Namespace {
+                            type_: linux::NamespaceType::User,
+                            path: None,
+                        },
+                        linux::Namespace {
+                            type_: linux::NamespaceType::Cgroup,
+                            path: None,
+                        },
+                    ],
+                    uid_mappings: vec![linux::UserNamespaceMappings {
+                        host_id: 1000,
+                        container_id: 0,
+                        size: 32000,
+                    }],
+                    gid_mappings: vec![linux::UserNamespaceMappings {
+                        host_id: 1000,
+                        container_id: 0,
+                        size: 32000,
+                    }],
+                    devices: vec![
+                        linux::Device {
+                            type_: linux::DeviceType::Character,
+                            path: PathBuf::from("/dev/fuse"),
+                            major: Some(10),
+                            minor: Some(229),
+                            file_mode: Some(438),
+                            uid: Some(0),
+                            gid: Some(0),
+                        },
+                        linux::Device {
+                            type_: linux::DeviceType::Block,
+                            path: PathBuf::from("/dev/sda"),
+                            major: Some(8),
+                            minor: Some(0),
+                            file_mode: Some(432),
+                            uid: Some(0),
+                            gid: Some(0),
+                        },
+                    ],
+                    cgroups_path: Some(PathBuf::from("/myRuntime/myContainer")),
+                    resources: Some(linux::Resources {
+                        devices: vec![
+                            linux::resources::Device {
+                                allow: false,
+                                type_: None,
+                                major: None,
+                                minor: None,
+                                access: Some(String::from("rwm")),
+                            },
+                            linux::resources::Device {
+                                allow: true,
+                                type_: Some(linux::resources::DeviceType::Character),
+                                major: Some(10),
+                                minor: Some(229),
+                                access: Some(String::from("rw")),
+                            },
+                            linux::resources::Device {
+                                allow: true,
+                                type_: Some(linux::resources::DeviceType::Block),
+                                major: Some(8),
+                                minor: Some(0),
+                                access: Some(String::from("r")),
+                            },
+                        ],
+                        memory: Some(linux::resources::Memory {
+                            limit: Some(536870912),
+                            reservation: Some(536870912),
+                            swap: Some(536870912),
+                            kernel: Some(-1),
+                            kernel_tcp: Some(-1),
+                            swappiness: Some(0),
+                            disable_oom_killer: Some(false),
+                        }),
+                        cpu: Some(linux::resources::Cpu {
+                            shares: Some(1024),
+                            quota: Some(1000000),
+                            period: Some(500000),
+                            realtime_runtime: Some(950000),
+                            realtime_period: Some(1000000),
+                            cpus: Some(String::from("2-3")),
+                            mems: Some(String::from("0-7")),
+                        }),
+                        block_io: Some(linux::resources::BlockIo {
+                            weight: Some(10),
+                            leaf_weight: Some(10),
+                            weight_device: vec![
+                                linux::resources::DeviceWeight {
+                                    major: 8,
+                                    minor: 0,
+                                    weight: Some(500),
+                                    leaf_weight: Some(300),
+                                },
+                                linux::resources::DeviceWeight {
+                                    major: 8,
+                                    minor: 16,
+                                    weight: Some(500),
+                                    leaf_weight: None,
+                                },
+                            ],
+                            throttle_read_bps_device: vec![linux::resources::DeviceThrottle {
+                                major: 8,
+                                minor: 0,
+                                rate: 600,
+                            }],
+                            throttle_write_bps_device: vec![],
+                            throttle_read_iops_device: vec![],
+                            throttle_write_iops_device: vec![linux::resources::DeviceThrottle {
+                                major: 8,
+                                minor: 16,
+                                rate: 300,
+                            }],
+                        }),
+                        hugepage_limits: vec![linux::resources::HugepageLimit {
+                            page_size: String::from("2MB"),
+                            limit: 9223372036854772000,
+                        }],
+                        network: Some(linux::resources::Network {
+                            class_id: Some(1048577),
+                            priorities: vec![
+                                linux::resources::NetworkPriority {
+                                    name: String::from("eth0"),
+                                    priority: 500,
+                                },
+                                linux::resources::NetworkPriority {
+                                    name: String::from("eth1"),
+                                    priority: 1000,
+                                },
+                            ],
+                        }),
+                        pids: Some(linux::resources::Pids { limit: 32771 }),
+                    }),
+                    intel_rdt: None,
+                    sysctl: [
+                        (String::from("net.ipv4.ip_forward"), String::from("1")),
+                        (String::from("net.core.somaxconn"), String::from("256")),
+                    ]
+                    .iter()
+                    .cloned()
+                    .collect(),
+                    seccomp: Some(linux::Seccomp {
+                        default_action: linux::seccomp::Action::Allow,
+                        architectures: vec![
+                            linux::seccomp::Architecture::X86,
+                            linux::seccomp::Architecture::X32,
+                        ],
+                        syscalls: vec![linux::seccomp::Syscall {
+                            names: vec![String::from("getcwd"), String::from("chmod")],
+                            action: linux::seccomp::Action::Errno,
+                            args: vec![],
+                        }],
+                    }),
+                    rootfs_propagation: Some(linux::RootfsPropagation::Slave),
+                    masked_paths: vec![
+                        PathBuf::from("/proc/kcore"),
+                        PathBuf::from("/proc/latency_stats"),
+                        PathBuf::from("/proc/timer_stats"),
+                        PathBuf::from("/proc/sched_debug"),
+                    ],
+                    readonly_paths: vec![
+                        PathBuf::from("/proc/asound"),
+                        PathBuf::from("/proc/bus"),
+                        PathBuf::from("/proc/fs"),
+                        PathBuf::from("/proc/irq"),
+                        PathBuf::from("/proc/sys"),
+                        PathBuf::from("/proc/sysrq-trigger"),
+                    ],
+                    mount_label: Some(String::from(
+                        "system_u:object_r:svirt_sandbox_file_t:s0:c715,c811",
+                    )),
+                }),
+            }
+        );
     }
 
     // Example from https://github.com/opencontainers/runtime-spec/blob/v1.0.1/config.md
