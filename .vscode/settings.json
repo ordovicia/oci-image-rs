@@ -9,6 +9,7 @@
         "chown",
         "chrono",
         "chroot",
+        "clippy",
         "concat",
         "conv",
         "cpus",
