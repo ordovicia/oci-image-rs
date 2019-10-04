@@ -177,29 +177,33 @@ pub struct ConsoleSize {
     pub width: usize,
 }
 
-/// As which user a container process runs.
+/// User as which a container process runs.
 #[derive(Debug, Clone, PartialEq, Eq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(Serialize, Deserialize),
-    serde(rename_all = "camelCase")
-)]
-pub struct User {
-    /// [POSIX] User ID in the container namespace.
-    pub uid: u32,
-    /// [POSIX] Group ID in the container namespace.
-    pub gid: u32,
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(untagged))]
+pub enum User {
+    /// Posix-platform user.
+    #[cfg_attr(feature = "serde", serde(rename_all = "camelCase"))]
+    Posix {
+        /// User ID in the container namespace.
+        uid: u32,
 
-    /// [POSIX] Additional group IDs in the container namespace.
-    #[cfg_attr(
-        feature = "serde",
-        serde(skip_serializing_if = "Vec::is_empty", default)
-    )]
-    pub additional_gids: Vec<u32>,
+        /// Group ID in the container namespace.
+        gid: u32,
 
-    /// [Windows] User name for the process.
-    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
-    pub username: Option<String>,
+        /// Additional group IDs in the container namespace.
+        #[cfg_attr(
+            feature = "serde",
+            serde(skip_serializing_if = "Vec::is_empty", default)
+        )]
+        additional_gids: Vec<u32>,
+    },
+
+    /// Windows user.
+    Windows {
+        /// User name for the process.
+        #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
+        username: Option<String>,
+    },
 }
 
 /// Resource limits for a container process.
@@ -270,4 +274,41 @@ pub struct Hook {
     /// The number of seconds before aborting the hook.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub timeout: Option<u32>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_deser_user() {
+        const JSON_USER_POSIX: &str = r#"{
+            "uid": 1,
+            "gid": 1,
+            "additionalGids": [5, 6]
+        }"#;
+
+        const JSON_USER_WINDOWS: &str = r#"{
+            "username": "containeradministrator"
+        }"#;
+
+        let user_posix: User = serde_json::from_str(JSON_USER_POSIX).unwrap();
+        let user_windows: User = serde_json::from_str(JSON_USER_WINDOWS).unwrap();
+
+        assert_eq!(
+            user_posix,
+            User::Posix {
+                uid: 1,
+                gid: 1,
+                additional_gids: vec![5, 6]
+            }
+        );
+
+        assert_eq!(
+            user_windows,
+            User::Windows {
+                username: Some(String::from("containeradministrator")),
+            }
+        );
+    }
 }

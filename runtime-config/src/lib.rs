@@ -3,6 +3,10 @@
 //! Schema in this crate is based on the v1.0.1 release of the OCI runtime config spec. See the
 //! [OCI runtime spec] for more information about the spec.
 //!
+//! For platform-specific config sections, this crate currently supports only Linux-specific config
+//! section. Deserialization of runtime configs with a Windows- or Solaris-specific config section
+//! will fail.
+//!
 //! [OCI runtime spec]: https://github.com/opencontainers/runtime-spec/releases/tag/v1.0.1
 
 #![warn(
@@ -119,11 +123,10 @@ mod tests {
             process: Some(config::Process {
                 terminal: Some(true),
                 console_size: None,
-                user: config::User {
+                user: config::User::Posix {
                     uid: 1,
                     gid: 1,
                     additional_gids: vec![5, 6],
-                    username: None,
                 },
                 cwd: PathBuf::from("/"),
                 env: vec![
@@ -501,11 +504,10 @@ mod tests {
                 process: Some(config::Process {
                     terminal: Some(true),
                     console_size: None,
-                    user: config::User {
+                    user: config::User::Posix {
                         uid: 1,
                         gid: 1,
                         additional_gids: vec![5, 6],
-                        username: None,
                     },
                     cwd: PathBuf::from("/"),
                     env: vec![

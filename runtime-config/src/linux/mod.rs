@@ -224,10 +224,7 @@ pub enum DeviceType {
 )]
 pub struct IntelRdt {
     /// Schema for L3 cache ID and capacity bitmask (CBM).
-    #[cfg_attr(
-        feature = "serde",
-        serde(rename = "classID", skip_serializing_if = "Option::is_none")
-    )]
+    #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
     pub l3_cache_schema: Option<String>,
 }
 
@@ -244,4 +241,25 @@ pub enum RootfsPropagation {
     Private,
     Shared,
     Unbindable,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_intel_rdt_deser() {
+        const JSON: &str = r#"{
+            "l3CacheSchema": "L3:0=ffff0;1=3ff"
+        }"#;
+
+        let intel_rdt: IntelRdt = serde_json::from_str(JSON).unwrap();
+
+        assert_eq!(
+            intel_rdt,
+            IntelRdt {
+                l3_cache_schema: Some(String::from("L3:0=ffff0;1=3ff"))
+            }
+        );
+    }
 }
