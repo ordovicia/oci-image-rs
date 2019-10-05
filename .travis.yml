@@ -17,6 +17,9 @@ matrix:
 script:
   - cargo build --verbose --all
   - cargo test --verbose --all
-  # --no-default-features for spec
-  - cargo build --verbose --manifest-path spec/Cargo.toml --no-default-features
-  - cargo test --verbose --manifest-path spec/Cargo.toml --no-default-features
+  # --no-default-features for image-spec
+  - cargo build --verbose --manifest-path image-spec/Cargo.toml --no-default-features
+  - cargo test --verbose --manifest-path image-spec/Cargo.toml --no-default-features
+  # --no-default-features for runtime-config
+  - cargo build --verbose --manifest-path runtime-config/Cargo.toml --no-default-features
+  - cargo test --verbose --manifest-path runtime-config/Cargo.toml --no-default-features
