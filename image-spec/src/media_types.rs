@@ -28,8 +28,10 @@ pub enum MediaType {
 }
 
 macro_rules! _impl_str_conv {
-    ( $( ($v: ident, $s: literal) ),* ) => {
-        impl_str_conv!(MediaType, $( ( $v, concat!("application/vnd.oci.", $s) ) ),* );
+    ( $( ($v: ident, $s: literal) ),* $(,)?) => {
+        impl_string_conversion_other!(
+            MediaType, $( ( $v, concat!("application/vnd.oci.", $s) ) ),*
+        );
     };
 }
 
@@ -42,9 +44,10 @@ _impl_str_conv! {
     (LayerTar, "image.layer.v1.tar"),
     (LayerTarGzip, "image.layer.v1.tar+gzip"),
     (LayerTarNondistributable, "image.layer.nondistributable.v1.tar"),
-    (LayerTarGzipNondistributable, "image.layer.nondistributable.v1.tar+gzip")
+    (LayerTarGzipNondistributable, "image.layer.nondistributable.v1.tar+gzip"),
 }
-impl_serde_for_str_conv!(MediaType);
+
+impl_serde_with_string_conversion!(MediaType);
 
 #[cfg(all(feature = "serde", test))]
 mod tests {

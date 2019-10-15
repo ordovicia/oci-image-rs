@@ -214,7 +214,7 @@ impl FromStr for Port {
     }
 }
 
-impl_serde_for_str_conv!(Port);
+impl_serde_with_string_conversion!(Port);
 
 impl fmt::Display for EnvVar {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -242,7 +242,7 @@ impl FromStr for EnvVar {
     }
 }
 
-impl_serde_for_str_conv!(EnvVar);
+impl_serde_with_string_conversion!(EnvVar);
 
 impl fmt::Display for ParsePortError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
