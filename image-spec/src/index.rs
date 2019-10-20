@@ -93,6 +93,7 @@ mod tests {
           ("com.example.key2", "value2")
         ]
         .iter()
+        .copied()
         .map(|(k, v)| (k.to_string(), v.to_string()))
         .collect::<Annotations>(),
       }
@@ -144,6 +145,7 @@ mod tests {
         // ("com.example.key2", "value2"),
       ]
       .iter()
+      .copied()
       .map(|(k, v)| (k.to_string(), v.to_string()))
       .collect::<Annotations>(),
     };

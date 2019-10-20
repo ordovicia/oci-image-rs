@@ -395,6 +395,7 @@ mod tests_serde {
                         ("BAR", "well_written_spec"),
                     ]
                     .iter()
+                    .copied()
                     .map(|(n, v)| EnvVar {
                         name: n.to_string(),
                         value: v.to_string()
@@ -421,6 +422,7 @@ mod tests_serde {
                         ),
                     ]
                     .iter()
+                    .copied()
                     .map(|(k, v)| (k.to_string(), v.to_string()))
                     .collect(),
                     stop_signal: None,
@@ -475,6 +477,7 @@ mod tests_serde {
                         ("BAR", "well_written_spec"),
                     ]
                     .iter()
+                    .copied()
                     .map(|(n, v)| EnvVar {
                         name: n.to_string(),
                         value: v.to_string()
@@ -501,6 +504,7 @@ mod tests_serde {
                         // ),
                     ]
                     .iter()
+                    .copied()
                     .map(|(k, v)| (k.to_string(), v.to_string()))
                     .collect(),
                     stop_signal: None,
