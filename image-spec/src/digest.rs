@@ -184,12 +184,12 @@ impl FromStr for Digest {
     }
 }
 
-impl_serde_for_str_conv!(Digest);
+impl_serde_with_string_conversion!(Digest);
 
-impl_str_conv! {
+impl_string_conversion_other! {
     Algorithm,
     (Sha256, "sha256"),
-    (Sha512, "sha512")
+    (Sha512, "sha512"),
 }
 
 impl fmt::Display for ParseError {

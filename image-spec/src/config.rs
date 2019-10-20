@@ -214,7 +214,7 @@ impl FromStr for Port {
     }
 }
 
-impl_serde_for_str_conv!(Port);
+impl_serde_with_string_conversion!(Port);
 
 impl fmt::Display for EnvVar {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -242,7 +242,7 @@ impl FromStr for EnvVar {
     }
 }
 
-impl_serde_for_str_conv!(EnvVar);
+impl_serde_with_string_conversion!(EnvVar);
 
 impl fmt::Display for ParsePortError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -395,6 +395,7 @@ mod tests_serde {
                         ("BAR", "well_written_spec"),
                     ]
                     .iter()
+                    .copied()
                     .map(|(n, v)| EnvVar {
                         name: n.to_string(),
                         value: v.to_string()
@@ -421,6 +422,7 @@ mod tests_serde {
                         ),
                     ]
                     .iter()
+                    .copied()
                     .map(|(k, v)| (k.to_string(), v.to_string()))
                     .collect(),
                     stop_signal: None,
@@ -475,6 +477,7 @@ mod tests_serde {
                         ("BAR", "well_written_spec"),
                     ]
                     .iter()
+                    .copied()
                     .map(|(n, v)| EnvVar {
                         name: n.to_string(),
                         value: v.to_string()
@@ -501,6 +504,7 @@ mod tests_serde {
                         // ),
                     ]
                     .iter()
+                    .copied()
                     .map(|(k, v)| (k.to_string(), v.to_string()))
                     .collect(),
                     stop_signal: None,

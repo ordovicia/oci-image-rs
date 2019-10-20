@@ -17,9 +17,33 @@
 )]
 
 #[macro_use]
-macro_rules! impl_str_conv {
-    ( $e: ident, $( ($v: ident, $s: expr) ),* ) => {
-        impl std::fmt::Display for $e {
+macro_rules! impl_string_conversion {
+    ($enum: ident, $err: ident, $( ($v: ident, $s: expr) ),* $(,)?) => {
+        impl std::fmt::Display for $enum {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>)-> std::fmt::Result {
+                f.write_str(match self {
+                    $(Self::$v => $s),*,
+                })
+            }
+        }
+
+        impl std::str::FromStr for $enum {
+            type Err = $err;
+
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                match s {
+                    $($s => Ok(Self::$v)),*,
+                    _ => Err($err),
+                }
+            }
+        }
+    }
+}
+
+#[macro_use]
+macro_rules! impl_string_conversion_other {
+    ($enum: ident, $( ($v: ident, $s: expr) ),* $(,)?) => {
+        impl std::fmt::Display for $enum {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>)-> std::fmt::Result {
                 f.write_str(match self {
                     $(Self::$v => $s),*,
@@ -28,8 +52,9 @@ macro_rules! impl_str_conv {
             }
         }
 
-        impl std::str::FromStr for $e {
+        impl std::str::FromStr for $enum {
             type Err = std::convert::Infallible;
+
             fn from_str(s: &str) -> Result<Self, Self::Err> {
                 Ok(match s {
                     $($s => Self::$v),*,
@@ -41,7 +66,7 @@ macro_rules! impl_str_conv {
 }
 
 #[macro_use]
-macro_rules! impl_serde_for_str_conv {
+macro_rules! impl_serde_with_string_conversion {
     ($s: ident) => {
         #[cfg(feature = "serde")]
         impl serde::Serialize for $s {

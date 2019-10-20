@@ -87,11 +87,6 @@ pub struct Platform {
 /// Pre-defined types of OSs.
 // Listed on https://golang.org/doc/install/source#environment
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(
-    feature = "serde",
-    derive(Serialize, Deserialize),
-    serde(rename_all = "lowercase")
-)]
 pub enum Os {
     /// Android.
     Android,
@@ -115,14 +110,31 @@ pub enum Os {
     Windows,
 }
 
+/// Error type for parsing a string into an `Os`.
+///
+/// In a future version, this struct may have fields that convey the cause of error.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ParseOsError;
+
+impl_string_conversion! {
+    Os, ParseOsError,
+    (Android, "android"),
+    (Darwin, "darwin"),
+    (DragonFly, "dragonfly"),
+    (FreeBsd, "freebsd"),
+    (Linux, "linux"),
+    (NetBsd, "netbsd"),
+    (OpenBsd, "openbsd"),
+    (Plan9, "plan9"),
+    (Solaris, "solaris"),
+    (Windows, "windows"),
+}
+
+impl_serde_with_string_conversion!(Os);
+
 /// Pre-defined types of architectures.
 // Listed on https://golang.org/doc/install/source#environment
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-#[cfg_attr(
-    feature = "serde",
-    derive(Serialize, Deserialize),
-    serde(rename_all = "lowercase")
-)]
 pub enum Architecture {
     /// x86 64-bit.
     Amd64,
@@ -146,6 +158,28 @@ pub enum Architecture {
     /// IBM System z 64-bit, big-endian.
     S390X,
 }
+
+/// Error type for parsing a string into an `Architecture`.
+///
+/// In a future version, this struct may have fields that convey the cause of error.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ParseArchitectureError;
+
+impl_string_conversion! {
+    Architecture, ParseArchitectureError,
+    (Amd64, "amd64"),
+    (Arm, "arm"),
+    (Arm64, "arm64"),
+    (i386, "i386"),
+    (Mips, "mips"),
+    (Mips64, "mips64"),
+    (MipsLe, "mipsle"),
+    (Ppc64, "ppc64"),
+    (Ppc64Le, "ppc64le"),
+    (S390X, "s390x"),
+}
+
+impl_serde_with_string_conversion!(Architecture);
 
 /// Pre-defined variants of CPUs.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
