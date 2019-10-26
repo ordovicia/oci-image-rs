@@ -10,6 +10,8 @@ use chrono::{DateTime, FixedOffset};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
+use environ_str::EnvVar;
+
 use crate::{
     descriptor::{Architecture, Os},
     Annotations, Digest, GoSet,
@@ -132,19 +134,6 @@ pub struct ParsePortError {
     source: Option<std::num::ParseIntError>,
 }
 
-/// Environment variable.
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct EnvVar {
-    /// Name of this environment variable.
-    pub name: String,
-    /// Value of this environment variable.
-    pub value: String,
-}
-
-/// Error type for parsing a string into a `EnvVar`.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ParseEnvVarError;
-
 /// Type of a rootfs.
 pub const TYPE_LAYERS: &str = "layers";
 
@@ -216,34 +205,6 @@ impl FromStr for Port {
 
 impl_serde_with_string_conversion!(Port);
 
-impl fmt::Display for EnvVar {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}={}", self.name, self.value)
-    }
-}
-
-impl FromStr for EnvVar {
-    type Err = ParseEnvVarError;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut equal_sp = s.split('=');
-
-        let name = equal_sp.next().ok_or(ParseEnvVarError)?;
-        let val = equal_sp.next().ok_or(ParseEnvVarError)?;
-
-        if name.is_empty() || equal_sp.next().is_some() {
-            return Err(ParseEnvVarError);
-        }
-
-        Ok(EnvVar {
-            name: name.to_string(),
-            value: val.to_string(),
-        })
-    }
-}
-
-impl_serde_with_string_conversion!(EnvVar);
-
 impl fmt::Display for ParsePortError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Failed to parse port")?;
@@ -260,14 +221,6 @@ impl Error for ParsePortError {
         self.source.as_ref().map(|s| s as &_)
     }
 }
-
-impl fmt::Display for ParseEnvVarError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("Failed to parse environment variable")
-    }
-}
-
-impl Error for ParseEnvVarError {}
 
 #[cfg(test)]
 mod tests {
@@ -312,51 +265,6 @@ mod tests {
 
         let port = Port::Tcp { port: 8080 };
         assert_eq!(port.to_string(), "8080/tcp");
-    }
-
-    #[test]
-    fn test_env_var_from_str() {
-        let env_var = EnvVar::from_str("name=val").unwrap();
-        assert_eq!(
-            env_var,
-            EnvVar {
-                name: "name".to_string(),
-                value: "val".to_string()
-            }
-        );
-
-        let env_var = EnvVar::from_str("name=").unwrap();
-        assert_eq!(
-            env_var,
-            EnvVar {
-                name: "name".to_string(),
-                value: String::new()
-            }
-        );
-    }
-
-    #[test]
-    fn err_env_var_from_str() {
-        let test_cases = &["", "=", "=val", "name-val", "name-"];
-
-        for case in test_cases {
-            assert_eq!(EnvVar::from_str(case).unwrap_err(), ParseEnvVarError);
-        }
-    }
-
-    #[test]
-    fn test_env_var_display() {
-        let env_var = EnvVar {
-            name: "name".to_string(),
-            value: "val".to_string(),
-        };
-        assert_eq!(env_var.to_string(), "name=val");
-
-        let env_var = EnvVar {
-            name: "name".to_string(),
-            value: String::new(),
-        };
-        assert_eq!(env_var.to_string(), "name=");
     }
 }
 
