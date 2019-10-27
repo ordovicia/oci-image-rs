@@ -36,6 +36,7 @@ pub const OCI_VERSION: &str = "1.0.1";
 #[cfg(all(feature = "serde", test))]
 mod tests {
     use super::*;
+    use environ_str::EnvVar;
     use std::path::PathBuf;
 
     #[test]
@@ -134,10 +135,15 @@ mod tests {
                 },
                 cwd: PathBuf::from("/"),
                 env: vec![
-                    String::from(
-                        "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-                    ),
-                    String::from("TERM=xterm"),
+                    EnvVar {
+                        name: "PATH".to_string(),
+                        value: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+                            .to_string(),
+                    },
+                    EnvVar {
+                        name: "TERM".to_string(),
+                        value: "xterm".to_string(),
+                    },
                 ],
                 args: vec![String::from("sh")],
                 rlimits: vec![
@@ -188,7 +194,10 @@ mod tests {
                             String::from("arg1"),
                             String::from("arg2"),
                         ],
-                        env: vec![String::from("key1=value1")],
+                        env: vec![EnvVar {
+                            name: "key1".to_string(),
+                            value: "value1".to_string(),
+                        }],
                         timeout: None,
                     },
                     config::Hook {
@@ -515,10 +524,15 @@ mod tests {
                     },
                     cwd: PathBuf::from("/"),
                     env: vec![
-                        String::from(
-                            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
-                        ),
-                        String::from("TERM=xterm"),
+                        EnvVar {
+                            name: "PATH".to_string(),
+                            value: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+                                .to_string(),
+                        },
+                        EnvVar {
+                            name: "TERM".to_string(),
+                            value: "xterm".to_string(),
+                        }
                     ],
                     args: vec![String::from("sh")],
                     rlimits: vec![
@@ -569,7 +583,10 @@ mod tests {
                                 String::from("arg1"),
                                 String::from("arg2"),
                             ],
-                            env: vec![String::from("key1=value1")],
+                            env: vec![EnvVar {
+                                name: "key1".to_string(),
+                                value: "value1".to_string(),
+                            }],
                             timeout: None,
                         },
                         config::Hook {

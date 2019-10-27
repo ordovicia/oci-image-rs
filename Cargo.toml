@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "environ-str",
     "image-spec",
     "image-unpack",
     "runtime-config",

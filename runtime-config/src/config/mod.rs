@@ -6,10 +6,11 @@
 
 mod capability;
 
+use std::{collections::HashMap, path::PathBuf};
+
+use environ_str::EnvVar;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
-
-use std::{collections::HashMap, path::PathBuf};
 
 pub use capability::{Capabilities, Capability};
 
@@ -126,7 +127,7 @@ pub struct Process {
         feature = "serde",
         serde(skip_serializing_if = "Vec::is_empty", default)
     )]
-    pub env: Vec<String>,
+    pub env: Vec<EnvVar>,
 
     /// Arguments for the process, with similar semantics to IEEE Std 1003.1-2008 `execvp`'s `argv`.
     pub args: Vec<String>,
@@ -269,7 +270,7 @@ pub struct Hook {
         feature = "serde",
         serde(skip_serializing_if = "Vec::is_empty", default)
     )]
-    pub env: Vec<String>,
+    pub env: Vec<EnvVar>,
 
     /// The number of seconds before aborting the hook.
     #[cfg_attr(feature = "serde", serde(skip_serializing_if = "Option::is_none"))]
