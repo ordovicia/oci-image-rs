@@ -5,4 +5,7 @@ authors = ["Hidehito Yabuuchi <hdht.ybuc@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-image-spec = { package = "oci-image-spec", path = "../image-spec" }
+serde = { version = "1.0.98", features = ["derive"] }
+serde_json = "1.0.40"
+
+spec = { package = "oci-image-spec", path = "../image-spec" }
